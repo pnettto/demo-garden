@@ -9,11 +9,11 @@ import json
 from contextlib import asynccontextmanager
 
 # Environment variables for configuration
-DB_HOST = os.getenv("DB_HOST", "db")
-DB_USER = os.getenv("DB_USER", "user")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "password")
-DB_NAME = os.getenv("DB_NAME", "mydatabase")
-GO_WORKER_URL = os.getenv("GO_WORKER_URL", "http://go-worker:8080/process")
+DB_HOST = os.getenv("DB_HOST")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_NAME = os.getenv("DB_NAME")
+GO_WORKER_URL = 'http://go-worker:8080/process'
 
 def get_db_connection():
     try:
