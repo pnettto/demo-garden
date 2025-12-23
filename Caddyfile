@@ -1,3 +1,9 @@
+# Local development
+http://localhost {
+    reverse_proxy python-app:8000
+}
+
+# Production
 demos.pnetto.com {
     reverse_proxy python-app:8000
 }
