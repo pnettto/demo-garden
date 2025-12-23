@@ -17,7 +17,7 @@ jobs:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          passphrase: ${{ secrets.SSH_PASSPHRASE }}
+          passphrase: ${{ secrets.VM_PASSPHRASE }}
           script: |
             # Create app directory if not exists
             mkdir -p ~/demos
