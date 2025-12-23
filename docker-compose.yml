@@ -1,6 +1,6 @@
 services:
   python-app:
-    build: ./services/python-app
+    build: ./services/python/python-app
     ports:
       - "8000:8000" # Expose for Caddy to proxy, or for direct local testing
     environment:
@@ -16,7 +16,7 @@ services:
     restart: on-failure
 
   go-worker:
-    build: ./services/go-worker
+    build: ./services/go/go-worker
     expose:
       - "8080" # Only expose internally to the Docker network
     restart: on-failure
@@ -31,6 +31,12 @@ services:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
 
+  deno-app:
+    build: ./services/deno/deno-app
+    expose:
+      - "8000"
+    restart: on-failure
+
   caddy:
     image: caddy:latest
     restart: unless-stopped
@@ -39,6 +45,8 @@ services:
       - "443:443"
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./services/static/frontend/public:/var/www/html
+      - ./services/static/another-frontend/public:/var/www/another-html
       - caddy_data:/data
       - caddy_config:/config
     depends_on:

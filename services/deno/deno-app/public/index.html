@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Deno UI</title>
+        <style>
+            body {
+                font-family: -apple-system, sans-serif;
+                background: #232323;
+                color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+            }
+            .container {
+                background: #333;
+                padding: 2rem;
+                border-radius: 1rem;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+                text-align: center;
+            }
+            button {
+                background: #00d1b2;
+                color: white;
+                border: none;
+                padding: 0.5rem 1rem;
+                border-radius: 0.5rem;
+                cursor: pointer;
+                margin-top: 1rem;
+            }
+            pre {
+                background: #111;
+                padding: 1rem;
+                border-radius: 0.5rem;
+                margin-top: 1rem;
+                text-align: left;
+                max-width: 300px;
+                overflow: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Deno Mini-App</h1>
+            <p>Connected via Caddy at /my-deno</p>
+            <button id="fetch-btn">Fetch API Info</button>
+            <pre id="output">{}</pre>
+        </div>
+        <script>
+            document.getElementById("fetch-btn")
+                .addEventListener("click", async () => {
+                    const btn = document.getElementById(
+                        "fetch-btn",
+                    );
+                    btn.textContent = "Fetching...";
+                    try {
+                        // In the Caddy setup, /my-deno/api/info maps to /api/info in Deno
+                        const res = await fetch("./api/info");
+                        const data = await res.json();
+                        document.getElementById("output")
+                            .textContent = JSON.stringify(
+                                data,
+                                null,
+                                2,
+                            );
+                    } catch (err) {
+                        document.getElementById("output")
+                            .textContent = "Error: " +
+                                err.message;
+                    } finally {
+                        btn.textContent = "Fetch API Info";
+                    }
+                });
+        </script>
+    </body>
+</html>
