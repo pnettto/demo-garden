@@ -74,7 +74,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Enable CORS
-origins = ["*"]
+origins = [
+    "https://demos.pnetto.com",
+    "http://localhost",
+    "*", # Keeping * for flexibility in this demo environment
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

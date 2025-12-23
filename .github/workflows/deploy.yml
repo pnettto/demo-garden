@@ -1,0 +1,35 @@
+name: Deploy to VM
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # Create app directory if not exists
+            mkdir -p ~/my-apps
+            cd ~/my-apps
+
+            # Clone or pull the repo
+            if [ ! -d ".git" ]; then
+              # Note: For private repos, you might need a Deploy Key or Token setup on the VM
+              git clone https://github.com/${{ github.repository }}.git .
+            else
+              git pull origin main
+            fi
+
+            # Deploy using Docker Compose
+            # Note: The .env file should be managed on the VM or via GitHub Secrets
+            docker compose up -d --build --remove-orphans

@@ -1,3 +1,3 @@
-:80 {
+demos.pnetto.com {
     reverse_proxy python-app:8000
 }
