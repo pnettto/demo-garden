@@ -5,11 +5,11 @@ services:
       - "8000:8000" # Expose for Caddy to proxy, or for direct local testing
     environment:
       # These variables allow python-app to find the other services
-      DB_HOST: db
-      DB_USER: user
-      DB_PASSWORD: password
-      DB_NAME: mydatabase
-      GO_WORKER_URL: http://go-worker:8080/process
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      GO_WORKER_URL: ${GO_WORKER_URL}
     depends_on:
       - db
       - go-worker
@@ -24,9 +24,9 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

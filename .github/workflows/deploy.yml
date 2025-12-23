@@ -19,8 +19,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Create app directory if not exists
-            mkdir -p ~/my-apps
-            cd ~/my-apps
+            mkdir -p ~/demos
+            cd ~/demos
 
             # Clone or pull the repo
             if [ ! -d ".git" ]; then
