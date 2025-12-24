@@ -1,4 +1,4 @@
-FROM denoland/deno:alpine-1.46.3
+FROM denoland/deno:debian
 WORKDIR /app
 COPY . .
 RUN deno cache main.ts

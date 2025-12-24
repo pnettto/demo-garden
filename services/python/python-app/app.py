@@ -5,7 +5,6 @@ from psycopg.rows import dict_row
 import requests
 import os
 import uvicorn
-import json
 from contextlib import asynccontextmanager
 
 # Environment variables for configuration

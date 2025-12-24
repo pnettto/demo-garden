@@ -45,6 +45,13 @@ services:
     expose:
       - "8000"
     restart: on-failure
+
+  code-executor:
+    build: ./services/deno/code-executor
+    ports:
+      - "8000:8000"
+    restart: on-failure
+
   db:
     image: postgres:17-alpine
     environment:
