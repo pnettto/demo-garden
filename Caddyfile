@@ -7,6 +7,17 @@
         output stdout
     }
 
+    @notStatic {
+        not {
+            path *.html *.css *.js *.png *.jpg *.jpeg *.gif *.svg *.webp
+        }
+    }
+
+    rate_limit @notStatic {
+        key {remote_host}
+        rate 5r/10s
+    }
+
     handle_path /one* {
         root * /var/www/one-frontend
         file_server
@@ -31,16 +42,5 @@ http://localhost {
 }
 
 demos.pnetto.com {
-    @notStatic {
-        not {
-            path *.html *.css *.js *.png *.jpg *.jpeg *.gif *.svg *.webp
-        }
-    }
-
-    rate_limit @notStatic {
-        key {remote_host}
-        rate 5r/10s
-    }
-
     import common-config
 }
