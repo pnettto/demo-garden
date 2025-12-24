@@ -1,10 +1,22 @@
 services:
+  caddy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./services/static/one-frontend/public:/var/www/one-frontend
+      - ./services/static/another-frontend/public:/var/www/another-frontend
+
   python-app:
     build: ./services/python/python-app
-    ports:
-      - "8000:8000" # Expose for Caddy to proxy, or for direct local testing
+    expose:
+      - "8000"
     environment:
-      # These variables allow python-app to find the other services
       DB_HOST: ${DB_HOST}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
@@ -18,7 +30,13 @@ services:
   go-worker:
     build: ./services/go/go-worker
     expose:
-      - "8080" # Only expose internally to the Docker network
+      - "8080"
+    restart: on-failure
+
+  deno-app:
+    build: ./services/deno/deno-app
+    expose:
+      - "8000"
     restart: on-failure
 
   db:
@@ -30,27 +48,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
-
-  deno-app:
-    build: ./services/deno/deno-app
-    expose:
-      - "8000"
-    restart: on-failure
-
-  caddy:
-    image: caddy:latest
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
-      - ./services/static/frontend/public:/var/www/html
-      - ./services/static/another-frontend/public:/var/www/another-html
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - python-app
 
 volumes:
   postgres_data:

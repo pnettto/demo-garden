@@ -1,58 +1,31 @@
-{
-    admin off
+(common-config) {
+    log {
+        output stdout
+    }
+
+    handle_path /one* {
+        root * /var/www/one-frontend
+        file_server
+    }
+
+    handle_path /another* {
+        root * /var/www/another-frontend
+        file_server
+    }
+
+    handle_path /my-deno* {
+        reverse_proxy deno-app:8000
+    }
+
+    handle /process-data* {
+        reverse_proxy python-app:8000
+    }
 }
 
 http://localhost {
-    log {
-        output stdout
-    }
-
-    # Serve GUI at /my-gui
-    handle_path /my-gui* {
-        root * /var/www/html
-        file_server
-    }
-
-    # Serve Another GUI at /another-gui
-    handle_path /another-gui* {
-        root * /var/www/another-html
-        file_server
-    }
-
-    # Proxy Deno App
-    handle_path /my-deno* {
-        reverse_proxy deno-app:8000
-    }
-
-    # Proxy API
-    reverse_proxy /process-data* python-app:8000
+    import common-config
 }
 
-# Production
 demos.pnetto.com {
-    log {
-        output stdout
-    }
-
-    # Serve GUI at /my-gui
-    handle_path /my-gui* {
-        root * /var/www/html
-        file_server
-    }
-
-    # Serve Another GUI at /another-gui
-    handle_path /another-gui* {
-        root * /var/www/another-html
-        file_server
-    }
-
-    # Proxy Deno App
-    handle_path /my-deno* {
-        reverse_proxy deno-app:8000
-    }
-
-    # Proxy API
-    handle_path /process-data* {
-        reverse_proxy python-app:8000
-    }
+    import common-config
 }
