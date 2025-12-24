@@ -1,1 +1,6 @@
 .env
+
+proxy/certbot/conf/*
+proxy/certbot/www/*
+!proxy/certbot/conf/.gitkeep
+!proxy/certbot/www/.gitkeep

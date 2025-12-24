@@ -46,7 +46,7 @@
     <body>
         <div class="container">
             <h1>Deno Mini-App</h1>
-            <p>Connected via Caddy at /my-deno</p>
+            <p>Connected via Nginx at /my-deno</p>
             <button id="fetch-btn">Fetch API Info</button>
             <pre id="output">{}</pre>
         </div>
@@ -58,7 +58,7 @@
                     );
                     btn.textContent = "Fetching...";
                     try {
-                        // In the Caddy setup, /my-deno/api/info maps to /api/info in Deno
+                        // In the Nginx setup, /my-deno/api/info maps to /api/info in Deno
                         const res = await fetch("./api/info");
                         const data = await res.json();
                         document.getElementById("output")

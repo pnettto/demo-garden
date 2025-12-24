@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loader.classList.remove("hidden");
 
         try {
-            // Using absolute path because we'll proxy it via Caddy
+            // Using absolute path because we'll proxy it via Nginx
             const response = await fetch("/process-data");
 
             if (!response.ok) {
