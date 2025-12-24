@@ -1,3 +1,7 @@
+{
+    order rate_limit before reverse_proxy
+}
+
 (common-config) {
     log {
         output stdout
@@ -22,30 +26,21 @@
     }
 }
 
-{
-    order rate_limit before reverse_proxy
-}
-
 http://localhost {
     import common-config
 }
 
 demos.pnetto.com {
-    route {
-        # Matcher for static assets
-        @static path *.html *.css *.js *.png *.jpg *.jpeg *.gif *.svg *.webp
-
-        # Apply rate limit only if it's not a static asset
-        @notStatic not @static
-        
-        rate_limit @notStatic {
-            zone dynamic_zone {
-                key {remote_host}
-                window 10s
-                events 5
-            }
+    @notStatic {
+        not {
+            path *.html *.css *.js *.png *.jpg *.jpeg *.gif *.svg *.webp
         }
     }
-    
+
+    rate_limit @notStatic {
+        key {remote_host}
+        rate 5r/10s
+    }
+
     import common-config
 }
