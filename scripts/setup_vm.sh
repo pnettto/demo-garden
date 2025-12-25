@@ -39,6 +39,11 @@ sudo systemctl restart docker
 # Add the current user to the 'docker' group to allow running containers without sudo
 sudo usermod -aG docker $USER
 
+# Make sure the machine has the docker-compose binary
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \ 
+-o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
 # Pre-allocate a 2GB file to serve as virtual memory (swap)
 sudo fallocate -l 2G /swapfile
 # Restrict read/write permissions of the swap file to the root user for security

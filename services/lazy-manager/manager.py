@@ -130,7 +130,8 @@ async def proxy(request: Request, path: str):
 
 def monitor_services():
     while True:
-        time.sleep(1)
+        # Check again every 10 seconds
+        time.sleep(10)
         now = time.time()
         
         # Discover containers with the 'lazy=true' label
