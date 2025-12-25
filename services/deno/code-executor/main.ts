@@ -13,6 +13,9 @@ const BWRAP_BASE = [
     "/lib",
     "/lib",
     "--ro-bind",
+    "/lib64",
+    "/lib64",
+    "--ro-bind",
     "/v8cache",
     "/v8cache", // Shared cache for Deno performance
     "--proc",
