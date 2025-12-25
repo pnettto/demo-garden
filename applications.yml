@@ -3,6 +3,8 @@ services:
         build: ./services/python/python-app
         profiles:
             - lazy
+        labels:
+            - "lazy=true"
         expose:
             - "8000"
         environment:
@@ -19,6 +21,8 @@ services:
         build: ./services/go/go-worker
         profiles:
             - lazy
+        labels:
+            - "lazy=true"
         expose:
             - "8080"
         restart: on-failure
@@ -27,6 +31,14 @@ services:
         build: ./services/deno/deno-app
         profiles:
             - lazy
+        labels:
+            - "lazy=true"
+        expose:
+            - "8000"
+        restart: on-failure
+
+    deno-app-2:
+        build: ./services/deno/deno-app-2
         expose:
             - "8000"
         restart: on-failure
@@ -36,6 +48,8 @@ services:
         build: ./services/deno/code-executor
         profiles:
             - lazy
+        labels:
+            - "lazy=true"
         working_dir: /workspace
         tmpfs:
             - /workspace:size=32M,mode=1777,nr_inodes=100

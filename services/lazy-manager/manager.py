@@ -133,15 +133,17 @@ def monitor_services():
         time.sleep(1)
         now = time.time()
         
-        # Discover running containers and initialize activity if not tracked
-        CORE_SERVICES = ["nginx", "db", "certbot", "lazy-manager"]
+        # Discover containers with the 'lazy=true' label
         try:
             for container in client.containers.list():
-                service_name = container.labels.get('com.docker.compose.service')
-                if service_name and service_name not in CORE_SERVICES:
+                labels = container.labels
+                service_name = labels.get('com.docker.compose.service')
+                
+                if labels.get('lazy') == 'true' and service_name:
                     with stats_lock:
+                        # Only track if not already being tracked
                         if service_name not in service_activity:
-                            print(f"Discovered running service: {service_name}, starting idle timer", flush=True)
+                            print(f"Discovered lazy service: {service_name}, starting idle timer", flush=True)
                             service_activity[service_name] = now
         except Exception as e:
             print(f"Monitor discovery error: {e}", flush=True)
@@ -149,18 +151,28 @@ def monitor_services():
         with stats_lock:
             # Create a list of candidates to avoid resizing dict during iteration
             for service_name, last_active in list(service_activity.items()):
-                if service_request_count.get(service_name, 0) == 0:
-                    if now - last_active > IDLE_TIMEOUT:
-                        container = get_container(service_name)
-                        if container and container.status == "running":
-                            print(f"Idle timeout reached. Stopping {service_name}...", flush=True)
+                # Skip if we are currently handling a request (last_active might be old, 
+                # but request_count ensures safety)
+                count = service_request_count.get(service_name, 0)
+                if count > 0:
+                    continue
+                    
+                idle_time = now - last_active
+                if idle_time > IDLE_TIMEOUT:
+                    container = get_container(service_name)
+                    if container:
+                        if container.status == "running":
+                            print(f"Idle timeout reached ({idle_time:.1f}s > {IDLE_TIMEOUT}s). Stopping lazy service {service_name}...", flush=True)
                             try:
-                                container.stop()
+                                container.stop(timeout=10)
                                 print(f"Stopped {service_name}", flush=True)
                             except Exception as e:
                                 print(f"Error stopping {service_name}: {e}", flush=True)
-                        # Remove from activity tracking once process is handled (stopped or not found)
-                        # We'll re-discover it if it's somehow still running or gets started
+                        else:
+                            # Container is already stopped/exited, we can stop tracking it
+                            del service_activity[service_name]
+                    else:
+                        # Container not found, stop tracking
                         del service_activity[service_name]
 
 if __name__ == "__main__":
