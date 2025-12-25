@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3-minimal \
     sqlite3 \
     bash \
+    bubblewrap \
     && rm -rf /var/lib/apt/lists/*
 
 # Create user and directories
