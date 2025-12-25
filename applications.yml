@@ -1,0 +1,55 @@
+services:
+    python-app:
+        build: ./services/python/python-app
+        profiles:
+            - lazy
+        expose:
+            - "8000"
+        environment:
+            DB_HOST: ${DB_HOST}
+            DB_USER: ${DB_USER}
+            DB_PASSWORD: ${DB_PASSWORD}
+            DB_NAME: ${DB_NAME}
+        depends_on:
+            - db
+            - go-worker
+        restart: on-failure
+
+    go-worker:
+        build: ./services/go/go-worker
+        profiles:
+            - lazy
+        expose:
+            - "8080"
+        restart: on-failure
+
+    deno-app:
+        build: ./services/deno/deno-app
+        profiles:
+            - lazy
+        expose:
+            - "8000"
+        restart: on-failure
+
+    code-executor:
+        runtime: runsc
+        build: ./services/deno/code-executor
+        profiles:
+            - lazy
+        working_dir: /workspace
+        tmpfs:
+            - /workspace:size=32M,mode=1777,nr_inodes=100
+            - /tmp:size=32M,mode=1777,nr_inodes=100
+        security_opt:
+            - no-new-privileges:true
+        cap_drop:
+            - ALL
+        expose:
+            - "8000"
+        restart: on-failure
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.5"
+                    memory: 256M
+                    pids: 50
