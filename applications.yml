@@ -37,12 +37,6 @@ services:
             - "8000"
         restart: on-failure
 
-    deno-app-2:
-        build: ./services/deno/deno-app-2
-        expose:
-            - "8000"
-        restart: on-failure
-
     code-executor:
         runtime: runsc
         build: ./services/deno/code-executor
