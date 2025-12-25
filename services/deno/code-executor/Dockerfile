@@ -1,16 +1,40 @@
-FROM denoland/deno:debian
+FROM denoland/deno:bin AS deno_bin
+FROM node:20-slim AS node_bin
+
+FROM debian:bookworm-slim
+
+COPY --from=deno_bin /deno /usr/local/bin/deno
+COPY --from=node_bin /usr/local/bin/node /usr/local/bin/node
 
 RUN apt-get update && apt-get install -y \
-    python3 \
-    nodejs \
+    python3-minimal \
     sqlite3 \
     bash \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+# Create user and directories
+RUN groupadd -r deno && \
+    useradd -m -r -g deno deno && \
+    mkdir -p /opt/app /workspace && \
+    chown deno:deno /opt/app /workspace
+
+# Set app directory
+WORKDIR /opt/app
 COPY main.ts .
 
+# Pre-cache using the fixed path
+ENV DENO_DIR=/v8cache
+RUN mkdir -p $DENO_DIR && chown deno:deno $DENO_DIR
+USER deno
 RUN deno cache main.ts
 
 EXPOSE 8000
-CMD ["run", "--allow-net", "--allow-run", "--allow-env", "main.ts"]
+
+# Start Deno pointing to the absolute path of the script
+CMD ["deno", "run", \
+    "--allow-net=:8000", \
+    "--allow-run", \
+    "--allow-env", \
+    "--allow-write=/tmp,/workspace", \
+    "--allow-read=/tmp,/workspace,/opt/app", \
+    "/opt/app/main.ts"]
