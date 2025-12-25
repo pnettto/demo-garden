@@ -55,4 +55,8 @@ sudo swapon /swapfile
 # Append the swap file entry to the filesystem table to ensure it persists after reboot
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
+# Start SSL certs
+docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot -d demos.pnetto.com
+docker compose exec nginx nginx -s reload
+
 echo "VM Prep Complete!"

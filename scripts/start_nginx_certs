@@ -1,2 +1,0 @@
-docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot -d demos.pnetto.com
-docker compose exec nginx nginx -s reload
