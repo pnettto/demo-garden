@@ -54,4 +54,11 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot -d demos.pnetto.com
 docker compose exec nginx nginx -s reload
 
+# Docker management aliases
+cat << 'EOF' >> ~/.bashrc
+alias dps='docker ps --format "table {{.ID}}\t{{.Names}}\t{{.Status}}\t{{.Image}}"'
+alias drs="docker compose --profile '*' down --remove-orphans && docker compose up -d --build --remove-orphans"
+EOF
+source ~/.bashrc
+
 echo "VM Prep Complete!"
