@@ -52,11 +52,21 @@ async def ensure_service_running(service_name: str):
             container = get_container(service_name)
             if not container or container.status != "running":
                 print(f"Starting service: {service_name}", flush=True)
-                subprocess.run(
-                    ["docker-compose", "-p", PROJECT_NAME, "up", "-d", service_name],
-                    cwd=APP_DIR,
-                    check=True
-                )
+                try:
+                    result = subprocess.run(
+                        ["docker", "compose", "-p", PROJECT_NAME, "up", "-d", service_name],
+                        check=True,
+                        capture_output=True,
+                        text=True
+                    )
+                    print(result.stdout)
+                    print(result.stderr)
+                    result.check_returncode()  # will raise only if non-zero
+
+                except subprocess.CalledProcessError as e:
+                    print("STDOUT:", e.stdout)
+                    print("STDERR:", e.stderr)
+                    raise
                 
                 # Wait for container to be ready
                 for _ in range(30):
