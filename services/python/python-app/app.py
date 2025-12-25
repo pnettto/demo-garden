@@ -86,7 +86,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/process-data")
+@app.get("/")
 async def process_data():
     conn = None
     try:
