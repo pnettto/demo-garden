@@ -22,7 +22,7 @@ import (
 
 var (
 	projectName     = getEnv("PROJECT_NAME", "demos")
-	appDir          = getEnv("APP_DIR", "/app-dir")
+	demosDir        = getEnv("DEMOS_DIR", "/demos-dir")
 	idleTimeout     = getDurationEnv("IDLE_TIMEOUT", 10)
 	serviceActivity = make(map[string]time.Time)
 	serviceLocks    = make(map[string]*sync.Mutex)
@@ -102,9 +102,9 @@ func ensureServiceRunning(ctx context.Context, serviceName string) error {
 		if c == nil || c.State != "running" {
 			log.Printf("Starting service: %s", serviceName)
 			cmd := exec.Command("docker", "compose", "-p", projectName, "--profile", "lazy",
-				"-f", filepath.Join(appDir, "docker-compose.yml"),
+				"-f", filepath.Join(demosDir, "docker-compose.yml"),
 				"up", "-d", "--build", serviceName)
-			cmd.Dir = appDir
+			cmd.Dir = demosDir
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err != nil {
