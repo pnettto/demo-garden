@@ -1,36 +1,42 @@
 services:
-  python-go-test:
-    build: .
+  parallelism-main:
+    build: ./main
     profiles:
       - lazy
     labels:
-      - "lazy=true"
+      - remove_after_use
     expose:
       - "8000"
     environment:
-      DB_HOST: python-app-db
+      DB_HOST: parallelism-db
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
     depends_on:
-      - python-app-db
-      - go-worker
+      - parallelism-worker
+      - parallelism-db
     restart: on-failure
 
-  python-app-db:
+  parallelism-worker:
+    build: ./worker
+    profiles:
+      - lazy
+    expose:
+      - "8000"
+    restart: on-failure
+
+  parallelism-db:
     image: postgres:17-alpine
+    profiles:
+      - lazy
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_HOST_AUTH_METHOD: trust
-    profiles:
-      - lazy
-    labels:
-      - "lazy=true"
     volumes:
-      - python-app-postgres:/var/lib/postgresql/data
+      - parallelism-postgres:/var/lib/postgresql/data
     restart: unless-stopped
 
 volumes:
-  python-app-postgres:
+  parallelism-postgres:

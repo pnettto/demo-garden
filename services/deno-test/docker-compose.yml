@@ -4,7 +4,7 @@ services:
     profiles:
       - lazy
     labels:
-      - "lazy=true"
+      - garbage_collect
     expose:
       - "8000"
     restart: on-failure

@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -171,6 +172,11 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 
 			args = append(args, "up", "-d", "--build", serviceName)
 
+			log.Printf("-----------")
+			log.Printf("args")
+			log.Print(args)
+			log.Printf("-----------")
+
 			cmd := exec.Command("docker", args...)
 			cmd.Dir = demosDir
 			cmd.Stdout = os.Stdout
@@ -265,7 +271,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func monitorServices() {
 	for {
-		time.Sleep(10 * time.Second)
+		time.Sleep(5 * time.Second)
 		now := time.Now()
 		ctx := context.Background()
 
@@ -275,9 +281,11 @@ func monitorServices() {
 			mu.Lock()
 			for _, c := range containers {
 				serviceName := c.Labels["com.docker.compose.service"]
-				if c.Labels["lazy"] == "true" && serviceName != "" {
+
+				// Check for the garbage_collect label and ensure primary serviceName is valid
+				if _, ok := c.Labels["remove_after_use"]; ok && serviceName != "" {
 					if _, ok := serviceActivity[serviceName]; !ok {
-						log.Printf("Discovered lazy service: %s, starting idle timer", serviceName)
+						log.Printf("Found service to take down: %s, starting timer", serviceName)
 						serviceActivity[serviceName] = now
 					}
 				}
@@ -293,22 +301,33 @@ func monitorServices() {
 
 			if now.Sub(lastActive) > idleTimeout {
 				c, err := getContainer(ctx, name)
-				if err == nil && c != nil {
-					if c.State == "running" {
-						log.Printf("Idle timeout reached for %s. Stopping...", name)
-						timeout := 10
-						err := dockerClient.ContainerStop(ctx, c.ID, container.StopOptions{Timeout: &timeout})
-						if err != nil {
-							log.Printf("Error stopping %s: %v", name, err)
-						} else {
-							log.Printf("Stopped %s", name)
+				if err == nil && c != nil && c.State == "running" {
+					log.Printf("Idle timeout reached for %s. Stopping and checking dependencies...", name)
+
+					// 1. Stop the parent container
+					timeout := 10
+					dockerClient.ContainerStop(ctx, c.ID, container.StopOptions{Timeout: &timeout})
+
+					// 2. Identify and stop dependencies from labels
+					if dependsOn, ok := c.Labels["com.docker.compose.depends_on"]; ok && dependsOn != "" {
+						for _, entry := range strings.Split(dependsOn, ",") {
+							depName := strings.Split(entry, ":")[0]
+							depContainer, err := getContainer(ctx, depName)
+
+							if err == nil && depContainer != nil && depContainer.State == "running" {
+								// Check for the prevention label
+								if _, prevent := depContainer.Labels["never_remove"]; prevent {
+									log.Printf("Skipping stop for dependency %s (protected by label)", depName)
+									continue
+								}
+
+								log.Printf("Stopping dependency %s for parent %s", depName, name)
+								dockerClient.ContainerStop(ctx, depContainer.ID, container.StopOptions{Timeout: &timeout})
+							}
 						}
-					} else {
-						delete(serviceActivity, name)
 					}
-				} else {
-					delete(serviceActivity, name)
 				}
+				delete(serviceActivity, name)
 			}
 		}
 		mu.Unlock()

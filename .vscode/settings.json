@@ -1,4 +1,6 @@
 {
   "deno.enable": true,
-  "deno.enablePaths": ["services/deno"]
+  "deno.suggest.imports.hosts": {
+    "https://deno.land": true
+  }
 }

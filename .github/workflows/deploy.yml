@@ -32,4 +32,5 @@ jobs:
             # Deploy using Docker Compose
             # docker compose --profile '*' down --remove-orphans # Keep reference for convenience
             docker compose pull
-            docker compose up -d --build --remove-orphans
+            docker compose --profile lazy build
+            docker compose up -d --remove-orphans

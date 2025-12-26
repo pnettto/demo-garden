@@ -11,11 +11,10 @@ DB_HOST = os.getenv("DB_HOST")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_NAME = os.getenv("DB_NAME")
-GO_WORKER_URL = 'http://go-worker:8000/process'
+GO_WORKER_URL = 'http://parallelism-worker:8000/process'
 
 def get_db_connection():
     try:
-        print('DB PASS', DB_PASSWORD)
         conn = psycopg.connect(
             host=DB_HOST,
             user=DB_USER,
