@@ -1,7 +1,5 @@
 import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
 
-// Hello
-
 // Base configuration for bubblewrap (bwrap) sandbox
 // Mounts system directories as read-only and isolates processes, users, and networks
 const BWRAP_BASE: string[] = [];
@@ -9,15 +7,7 @@ const BWRAP_BASE: string[] = [];
 BWRAP_BASE.push("--ro-bind", "/usr", "/usr"); // Read-only access to system binaries/libraries
 BWRAP_BASE.push("--ro-bind", "/bin", "/bin");
 BWRAP_BASE.push("--ro-bind", "/lib", "/lib");
-
-// Dynamically check for /lib64 to prevent "No such file or directory" errors
-try {
-    await Deno.stat("/lib64");
-    BWRAP_BASE.push("--ro-bind", "/lib64", "/lib64");
-} catch {
-    // Path missing on host, skipping to avoid bwrap failure
-}
-
+BWRAP_BASE.push("--ro-bind-try", "/lib64", "/lib64"); // Works on Linux 64, not Mac Silicon
 BWRAP_BASE.push("--bind", "/v8cache", "/v8cache"); // Shared cache for Deno performance
 BWRAP_BASE.push("--proc", "/proc"); // Virtual filesystem for process info
 BWRAP_BASE.push("--dev", "/dev"); // Necessary device nodes
@@ -31,8 +21,6 @@ BWRAP_BASE.push("--new-session"); // Prevent terminal escape sequences
 BWRAP_BASE.push("--die-with-parent"); // Kill sandbox if the Deno process exits
 BWRAP_BASE.push("--dir", "/tmp"); // Create an empty, isolated /tmp
 BWRAP_BASE.push("--dir", "/home/deno"); // Create an empty home directory
-
-// console.log("BWRAP_BASE", BWRAP_BASE);
 
 // Support languages and their commands
 const COMMANDS: Record<string, { cmd: string; args: string[]; ext: string }> = {

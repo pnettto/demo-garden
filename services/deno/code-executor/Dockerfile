@@ -39,5 +39,5 @@ CMD ["deno", "run", \
     "--allow-run", \
     "--allow-env", \
     "--allow-write=/tmp,/workspace", \
-    "--allow-read=/tmp,/workspace,/opt/app", \
+    "--allow-read=/lib64,/tmp,/workspace,/opt/app,/lib64", \
     "/opt/app/main.ts"]
