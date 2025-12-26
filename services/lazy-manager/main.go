@@ -180,19 +180,15 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 			}
 
 			// Wait for it to be ready
-			// Increased timeout to 120s for slow database startups in production
-			const maxWaitSeconds = 120
+			// User requested a strict 5s timeout. If it's not ready by then, fail.
+			const maxWaitSeconds = 5
 			portReady := false
-			var lastErr error
 
 			for i := 0; i < maxWaitSeconds; i++ {
 				c, err = getContainer(ctx, serviceName)
 				if err == nil && c != nil && c.State == "running" {
-					// Container is running, check if port is open (quick check)
-					// We check for 1 second. If it fails, we loop again (checking container state)
-					if err := waitForPort(fmt.Sprintf("%s:%s", serviceName, targetPort), 1*time.Second); err != nil {
-						lastErr = err
-					} else {
+					// Container is running, check if port is open
+					if isPortOpen(fmt.Sprintf("%s:%s", serviceName, targetPort), 1*time.Second) {
 						portReady = true
 						break
 					}
@@ -201,10 +197,7 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 			}
 
 			if !portReady {
-				if lastErr != nil {
-					return fmt.Errorf("service %s running but port %s not ready after %ds: %w", serviceName, targetPort, maxWaitSeconds, lastErr)
-				}
-				return fmt.Errorf("service %s failed to start or listen in time (%ds)", serviceName, maxWaitSeconds)
+				return fmt.Errorf("service %s failed to become ready within %ds", serviceName, maxWaitSeconds)
 			}
 			return nil
 		}
@@ -212,27 +205,13 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 	return nil
 }
 
-func waitForPort(addr string, timeout time.Duration) error {
-	deadline := time.Now().Add(timeout)
-	var lastErr error
-	firstAttempt := true
-	for time.Now().Before(deadline) {
-		conn, err := net.DialTimeout("tcp", addr, 1*time.Second)
-		if err == nil {
-			conn.Close()
-			return nil
-		}
-		lastErr = err
-		if firstAttempt || time.Now().Second()%5 == 0 {
-			log.Printf("Waiting for %s: %v", addr, err)
-		}
-		firstAttempt = false
-		time.Sleep(500 * time.Millisecond)
+func isPortOpen(addr string, timeout time.Duration) bool {
+	conn, err := net.DialTimeout("tcp", addr, timeout)
+	if err != nil {
+		return false
 	}
-	if lastErr != nil {
-		return fmt.Errorf("timeout waiting for %s: %v", addr, lastErr)
-	}
-	return fmt.Errorf("timeout waiting for %s", addr)
+	conn.Close()
+	return true
 }
 
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
