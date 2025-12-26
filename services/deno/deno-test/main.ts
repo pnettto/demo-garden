@@ -1,5 +1,3 @@
-const decoder = new TextDecoder("utf-8");
-
 Deno.serve({ port: 8000 }, async (req) => {
     const url = new URL(req.url);
     console.log(`Incoming request: ${url.pathname}`);
