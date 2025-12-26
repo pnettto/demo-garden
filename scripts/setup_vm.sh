@@ -51,7 +51,14 @@ sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 # Start SSL certs
-# SUper annoying, nginx must be running smoothly and open
+
+## Remove stuff
+docker compose run --rm --entrypoint "certbot" certbot delete --cert-name demos.pnetto.com
+sudo rm -rf ./certbot/conf/live/demos.pnetto.com*
+sudo rm -rf ./certbot/conf/archive/demos.pnetto.com*
+sudo rm -rf ./certbot/conf/renewal/demos.pnetto.com*.conf
+
+# Super annoying, nginx must be running smoothly and open
 # on :80 and have the location /.well-known/acme-challenge/ setup
 docker compose run --rm --entrypoint "certbot" certbot certonly \
   --webroot \
@@ -59,8 +66,21 @@ docker compose run --rm --entrypoint "certbot" certbot certonly \
   --email pedro@pnetto.com \
   --agree-tos \
   --no-eff-email \
+  --force-renewal \
   -d demos.pnetto.com
 docker compose exec nginx nginx -s reload
+
+# Stagin version, to check if it would work
+# docker compose run --rm --entrypoint "certbot" certbot certonly \
+#   --webroot \
+#   --webroot-path=/var/www/certbot \
+#   --email pedro@pnetto.com \
+#   --agree-tos \
+#   --no-eff-email \
+#   --staging \
+#   --force-renewal \
+#   -d demos.pnetto.com
+
 
 # Docker management aliases
 cat << 'EOF' >> ~/.bashrc
