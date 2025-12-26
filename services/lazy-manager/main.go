@@ -180,18 +180,33 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 			}
 
 			// Wait for it to be ready
-			for i := 0; i < 30; i++ {
+			// Increased timeout to 120s for slow database startups in production
+			const maxWaitSeconds = 120
+			portReady := false
+			var lastErr error
+
+			for i := 0; i < maxWaitSeconds; i++ {
 				c, err = getContainer(ctx, serviceName)
 				if err == nil && c != nil && c.State == "running" {
-					// Container is running, now wait for the port to be open
-					if err := waitForPort(fmt.Sprintf("%s:%s", serviceName, targetPort), 30*time.Second); err != nil {
-						return fmt.Errorf("service %s running but port %s not ready: %w", serviceName, targetPort, err)
+					// Container is running, check if port is open (quick check)
+					// We check for 1 second. If it fails, we loop again (checking container state)
+					if err := waitForPort(fmt.Sprintf("%s:%s", serviceName, targetPort), 1*time.Second); err != nil {
+						lastErr = err
+					} else {
+						portReady = true
+						break
 					}
-					return nil
 				}
 				time.Sleep(1 * time.Second)
 			}
-			return fmt.Errorf("service %s failed to start in time", serviceName)
+
+			if !portReady {
+				if lastErr != nil {
+					return fmt.Errorf("service %s running but port %s not ready after %ds: %w", serviceName, targetPort, maxWaitSeconds, lastErr)
+				}
+				return fmt.Errorf("service %s failed to start or listen in time (%ds)", serviceName, maxWaitSeconds)
+			}
+			return nil
 		}
 	}
 	return nil
@@ -199,13 +214,23 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 
 func waitForPort(addr string, timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
+	var lastErr error
+	firstAttempt := true
 	for time.Now().Before(deadline) {
 		conn, err := net.DialTimeout("tcp", addr, 1*time.Second)
 		if err == nil {
 			conn.Close()
 			return nil
 		}
+		lastErr = err
+		if firstAttempt || time.Now().Second()%5 == 0 {
+			log.Printf("Waiting for %s: %v", addr, err)
+		}
+		firstAttempt = false
 		time.Sleep(500 * time.Millisecond)
+	}
+	if lastErr != nil {
+		return fmt.Errorf("timeout waiting for %s: %v", addr, lastErr)
 	}
 	return fmt.Errorf("timeout waiting for %s", addr)
 }
