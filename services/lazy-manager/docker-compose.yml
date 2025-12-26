@@ -1,0 +1,14 @@
+services:
+  lazy-manager:
+    build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - .:/app-dir
+    environment:
+      IDLE_TIMEOUT: 10 # seconds
+      PROJECT_NAME: demos
+      APP_DIR: /app-dir
+      PYTHONUNBUFFERED: "1"
+    expose:
+      - "8001"
+    restart: unless-stopped

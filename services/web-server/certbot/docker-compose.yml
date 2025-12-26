@@ -1,0 +1,6 @@
+services:
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./conf:/etc/letsencrypt
+      - ./www:/var/www/certbot

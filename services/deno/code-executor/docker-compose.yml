@@ -1,0 +1,25 @@
+services:
+  code-executor:
+    runtime: runsc
+    build: .
+    profiles:
+      - lazy
+    labels:
+      - "lazy=true"
+    working_dir: /workspace
+    tmpfs:
+      - /workspace:size=32M,mode=1777,nr_inodes=100
+      - /tmp:size=32M,mode=1777,nr_inodes=100
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    expose:
+      - "8000"
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+          pids: 50

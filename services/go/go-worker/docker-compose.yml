@@ -1,0 +1,10 @@
+services:
+  go-worker:
+    build: .
+    profiles:
+      - lazy
+    labels:
+      - "lazy=true"
+    expose:
+      - "8080"
+    restart: on-failure

@@ -1,0 +1,10 @@
+services:
+  deno-test:
+    build: .
+    profiles:
+      - lazy
+    labels:
+      - "lazy=true"
+    expose:
+      - "8000"
+    restart: on-failure
