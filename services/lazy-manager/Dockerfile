@@ -1,24 +1,14 @@
-# 2-step process, build first, then reload docker
-# Issue with architecture (mac arm/ linux amd64)
-# Build command: 
-# GOOS=linux go build -o manager main.go
-# FROM alpine:latest
-# RUN apk add --no-cache docker-cli docker-cli-compose
-# WORKDIR /app
-# COPY manager .
-# CMD ["./manager"]
-
-# 1-step process, no need to build (happens in docker container)
-FROM golang:1.24-alpine AS builder
+# Build Stage
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
-COPY main.go ./
-RUN CGO_ENABLED=0 GOOS=linux go build -o manager main.go
+COPY . .
+ARG TARGETOS TARGETARCH
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o manager .
 
-# Final stage
+# Final Stage
 FROM alpine:latest
-# Install docker-cli and compose plugin
 RUN apk add --no-cache docker-cli docker-cli-compose
 WORKDIR /app
 COPY --from=builder /app/manager .

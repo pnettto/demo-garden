@@ -1,11 +1,12 @@
 services:
   lazy-manager:
+    image: ghcr.io/pnettto/lazy-manager:latest
     build: .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ../../:/demos-dir
     environment:
-      IDLE_TIMEOUT: 10 # seconds
+      IDLE_TIMEOUT: 10
       PROJECT_NAME: demos
       DEMOS_DIR: /demos-dir
       PYTHONUNBUFFERED: "1"
