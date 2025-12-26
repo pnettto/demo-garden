@@ -101,9 +101,31 @@ func ensureServiceRunning(ctx context.Context, serviceName string) error {
 
 		if c == nil || c.State != "running" {
 			log.Printf("Starting service: %s", serviceName)
-			cmd := exec.Command("docker", "compose", "-p", projectName, "--profile", "lazy",
-				"-f", filepath.Join(demosDir, "docker-compose.yml"),
-				"up", "-d", "--build", serviceName)
+
+			// Build base command
+			args := []string{"compose", "-p", projectName, "--profile", "lazy",
+				"-f", filepath.Join(demosDir, "docker-compose.yml")}
+
+			// Check for service-specific .env file
+			// Common service paths to check
+			servicePaths := []string{
+				filepath.Join(demosDir, "services", "python", serviceName, ".env"),
+				filepath.Join(demosDir, "services", "go", serviceName, ".env"),
+				filepath.Join(demosDir, "services", "deno", serviceName, ".env"),
+				filepath.Join(demosDir, "services", serviceName, ".env"),
+			}
+
+			for _, envPath := range servicePaths {
+				if _, err := os.Stat(envPath); err == nil {
+					log.Printf("Found .env file for %s at: %s", serviceName, envPath)
+					args = append(args, "--env-file", envPath)
+					break
+				}
+			}
+
+			args = append(args, "up", "-d", "--build", serviceName)
+
+			cmd := exec.Command("docker", args...)
 			cmd.Dir = demosDir
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
