@@ -186,8 +186,8 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 			}
 
 			// Wait for it to be ready
-			// User requested a strict 5s timeout. If it's not ready by then, fail.
-			const maxWaitSeconds = 5
+			// User requested a strict 20s timeout. If it's not ready by then, fail.
+			const maxWaitSeconds = 20
 			portReady := false
 
 			for i := 0; i < maxWaitSeconds; i++ {
