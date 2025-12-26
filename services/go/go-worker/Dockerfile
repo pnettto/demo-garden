@@ -8,5 +8,5 @@ RUN go mod init go-worker && \
 FROM alpine:latest
 WORKDIR /app
 COPY --from=builder /go-worker .
-EXPOSE 8080
+EXPOSE 8000
 CMD ["./go-worker"]

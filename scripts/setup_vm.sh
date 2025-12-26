@@ -51,6 +51,8 @@ sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 # Start SSL certs
+# SUper annoying, nginx must be running smoothly and open
+# on :80 and have the location /.well-known/acme-challenge/ setup
 docker compose run --rm --entrypoint "certbot" certbot certonly \
   --webroot \
   --webroot-path=/var/www/certbot \

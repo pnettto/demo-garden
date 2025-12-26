@@ -19,18 +19,29 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.VM_PASSPHRASE }}
           script: |
-            # Create app directory if not exists
-            mkdir -p ~/demos
-            cd ~/demos
+            DEMOS_FOLDER="/home/${{ secrets.VM_USER }}/demos"
+            mkdir -p $DEMOS_FOLDER
+            cd $DEMOS_FOLDER
 
-            # Clone or pull the repo
             if [ ! -d ".git" ]; then
-              # Note: For private repos, you might need a Deploy Key or Token setup on the VM
               git clone https://${{ secrets.GH_PAT }}@github.com/${{ github.repository }}.git .
             else
               git pull origin main
             fi
 
-            # Deploy using Docker Compose
-            # Note: The .env file should be managed on the VM or via GitHub Secrets
-            docker compose --profile '*' down --remove-orphans && docker compose up -d --build --remove-orphans
+            # 1. Create the cert renewal script
+            cat << EOF > $DEMOS_FOLDER/renew_certs.sh
+            #!/bin/bash
+            cd $DEMOS_FOLDER
+            docker compose run --rm --entrypoint "certbot" certbot renew --webroot-path=/var/www/certbot
+            docker compose exec -T nginx nginx -s reload
+            EOF
+            chmod +x $DEMOS_FOLDER/renew_certs.sh
+
+            # 2. Add to crontab if not already present
+            (crontab -l 2>/dev/null | grep -Fq "$DEMOS_FOLDER/renew_certs.sh") || (crontab -l 2>/dev/null; echo "0 0,12 * * * $DEMOS_FOLDER/renew_certs.sh >> $DEMOS_FOLDER/cert_renewal.log 2>&1") | crontab -
+
+            # 3. Deploy using Docker Compose
+            # docker compose --profile '*' down --remove-orphans # Keep reference for convenience
+            docker compose pull
+            docker compose up -d --build --remove-orphans

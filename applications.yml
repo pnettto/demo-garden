@@ -1,6 +1,6 @@
 services:
-    python-app:
-        build: ./services/python/python-app
+    python-go-test:
+        build: ./services/python/python-go-test
         profiles:
             - lazy
         labels:
@@ -8,14 +8,28 @@ services:
         expose:
             - "8000"
         environment:
-            DB_HOST: ${DB_HOST}
-            DB_USER: ${DB_USER}
-            DB_PASSWORD: ${DB_PASSWORD}
-            DB_NAME: ${DB_NAME}
+            DB_HOST: python-app-db
+            DB_USER: ${APP_PYTHON_APP_DB_USER}
+            DB_PASSWORD: ${APP_PYTHON_APP_DB_PASSWORD}
+            DB_NAME: ${APP_PYTHON_APP_DB_NAME}
         depends_on:
-            - db
+            - python-app-db
             - go-worker
         restart: on-failure
+
+    python-app-db:
+        image: postgres:17-alpine
+        environment:
+            POSTGRES_DB: ${APP_PYTHON_APP_DB_NAME}
+            POSTGRES_USER: ${APP_PYTHON_APP_DB_USER}
+            POSTGRES_PASSWORD: ${APP_PYTHON_APP_DB_PASSWORD}
+        profiles:
+            - lazy
+        labels:
+            - "lazy=true"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        restart: unless-stopped
 
     go-worker:
         build: ./services/go/go-worker
@@ -27,8 +41,8 @@ services:
             - "8080"
         restart: on-failure
 
-    deno-app:
-        build: ./services/deno/deno-app
+    deno-test:
+        build: ./services/deno/deno-test
         profiles:
             - lazy
         labels:

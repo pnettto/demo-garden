@@ -12,7 +12,7 @@ type TaskRequest struct {
 }
 
 type TaskResponse struct {
-	OriginalData string `json:"original_data"`
+	OriginalData  string `json:"original_data"`
 	ProcessedData string `json:"processed_data"`
 	WorkerID      string `json:"worker_id"`
 }
@@ -45,7 +45,7 @@ func processHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/process", processHandler)
-	port := "8080"
+	port := "8000"
 	log.Printf("Go Worker listening on :%s", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
