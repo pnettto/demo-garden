@@ -54,7 +54,9 @@ async def ensure_service_running(service_name: str):
                 print(f"Starting service: {service_name}", flush=True)
                 try:
                     result = subprocess.run(
-                        ["docker", "compose", "-p", PROJECT_NAME, "--profile", "lazy", "-f", os.path.join(APP_DIR, "docker-compose.yml"), "up", "-d", service_name],
+                        ["docker", "compose", "-p", PROJECT_NAME, "--profile", "lazy", 
+                        "-f", os.path.join(APP_DIR, "docker-compose.yml"), 
+                        "up", "-d", "--build", service_name],
                         cwd=APP_DIR,
                         check=True,
                         capture_output=True,

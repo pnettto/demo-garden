@@ -1,39 +1,38 @@
 import { join } from "https://deno.land/std@0.224.0/path/mod.ts";
 
+// Hello
+
 // Base configuration for bubblewrap (bwrap) sandbox
 // Mounts system directories as read-only and isolates processes, users, and networks
-const BWRAP_BASE = [
-    "--ro-bind",
-    "/usr",
-    "/usr", // Read-only access to system binaries/libraries
-    "--ro-bind",
-    "/bin",
-    "/bin",
-    "--ro-bind",
-    "/lib",
-    "/lib",
-    "--ro-bind",
-    "/lib64",
-    "/lib64",
-    "--ro-bind",
-    "/v8cache",
-    "/v8cache", // Shared cache for Deno performance
-    "--proc",
-    "/proc", // Virtual filesystem for process info
-    "--dev",
-    "/dev", // Necessary device nodes
-    "--unshare-user", // Create new user namespace (isolates root)
-    "--unshare-ipc", // Isolate Inter-Process Communication
-    "--unshare-pid", // Isolate Process IDs (cannot see other system procs)
-    "--unshare-uts", // Isolate hostname/domain name
-    "--new-session", // Prevent terminal escape sequences
-    "--die-with-parent", // Kill sandbox if the Deno process exits
-    "--dir",
-    "/tmp", // Create an empty, isolated /tmp
-    "--dir",
-    "/home/deno", // Create an empty home directory
-    "--bind", // Placeholder for the writable working directory
-];
+const BWRAP_BASE: string[] = [];
+
+BWRAP_BASE.push("--ro-bind", "/usr", "/usr"); // Read-only access to system binaries/libraries
+BWRAP_BASE.push("--ro-bind", "/bin", "/bin");
+BWRAP_BASE.push("--ro-bind", "/lib", "/lib");
+
+// Dynamically check for /lib64 to prevent "No such file or directory" errors
+try {
+    await Deno.stat("/lib64");
+    BWRAP_BASE.push("--ro-bind", "/lib64", "/lib64");
+} catch {
+    // Path missing on host, skipping to avoid bwrap failure
+}
+
+BWRAP_BASE.push("--bind", "/v8cache", "/v8cache"); // Shared cache for Deno performance
+BWRAP_BASE.push("--proc", "/proc"); // Virtual filesystem for process info
+BWRAP_BASE.push("--dev", "/dev"); // Necessary device nodes
+BWRAP_BASE.push("--unshare-user"); // Create new user namespace (isolates root)
+BWRAP_BASE.push("--uid", "0");
+BWRAP_BASE.push("--gid", "0");
+BWRAP_BASE.push("--unshare-ipc"); // Isolate Inter-Process Communication
+BWRAP_BASE.push("--unshare-pid"); // Isolate Process IDs (cannot see other system procs)
+BWRAP_BASE.push("--unshare-uts"); // Isolate hostname/domain name
+BWRAP_BASE.push("--new-session"); // Prevent terminal escape sequences
+BWRAP_BASE.push("--die-with-parent"); // Kill sandbox if the Deno process exits
+BWRAP_BASE.push("--dir", "/tmp"); // Create an empty, isolated /tmp
+BWRAP_BASE.push("--dir", "/home/deno"); // Create an empty home directory
+
+// console.log("BWRAP_BASE", BWRAP_BASE);
 
 // Support languages and their commands
 const COMMANDS: Record<string, { cmd: string; args: string[]; ext: string }> = {
@@ -81,6 +80,7 @@ Deno.serve(async (req) => {
             cwd: tempDir,
             args: [
                 ...BWRAP_BASE,
+                "--bind",
                 tempDir,
                 tempDir, // Bind the host tempDir to the same path inside sandbox
                 "--chdir",

@@ -21,17 +21,19 @@ RUN groupadd -r deno && \
 
 # Set app directory
 WORKDIR /opt/app
-COPY main.ts .
 
-# Pre-cache using the fixed path
+# Cache deps only (if you have imports)
+COPY deps.ts .
 ENV DENO_DIR=/v8cache
 RUN mkdir -p $DENO_DIR && chown deno:deno $DENO_DIR
 USER deno
-RUN deno cache main.ts
+RUN deno cache deps.ts
+
+# Copy app LAST so Docker invalidates on change
+COPY main.ts .
 
 EXPOSE 8000
 
-# Start Deno pointing to the absolute path of the script
 CMD ["deno", "run", \
     "--allow-net=:8000", \
     "--allow-run", \
