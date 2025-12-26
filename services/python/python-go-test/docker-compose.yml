@@ -7,8 +7,6 @@ services:
       - "lazy=true"
     expose:
       - "8000"
-    env_file:
-      - .env
     environment:
       DB_HOST: python-app-db
       DB_USER: ${DB_USER}
@@ -21,8 +19,6 @@ services:
 
   python-app-db:
     image: postgres:17-alpine
-    env_file:
-      - .env
     environment:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
