@@ -1,13 +1,24 @@
-FROM python:3.11-slim AS deps
+# 2-step process, build first, then reload docker
+# Build command: 
+# GOOS=linux go build -o manager main.go
+FROM alpine:latest
+RUN apk add --no-cache docker-cli docker-cli-compose
 WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY manager .
+CMD ["./manager"]
 
-FROM python:3.11-slim
-WORKDIR /app
-COPY --from=deps /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=deps /usr/local/bin /usr/local/bin
-RUN apt-get update && apt-get install -y curl gnupg lsb-release && rm -rf /var/lib/apt/lists/*
-RUN curl -fsSL https://get.docker.com | sh
-COPY manager.py .
-CMD ["python", "manager.py"]
+# 1-step process, no need to build (happens in docker container)
+# FROM golang:1.24-alpine AS builder
+# WORKDIR /app
+# COPY go.mod go.sum ./
+# RUN go mod download
+# COPY main.go ./
+# RUN CGO_ENABLED=0 GOOS=linux go build -o manager main.go
+
+# # Final stage
+# FROM alpine:latest
+# # Install docker-cli and compose plugin
+# RUN apk add --no-cache docker-cli docker-cli-compose
+# WORKDIR /app
+# COPY --from=builder /app/manager .
+# CMD ["./manager"]
