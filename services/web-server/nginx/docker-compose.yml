@@ -8,6 +8,6 @@ services:
     volumes:
       - ./conf.d:/etc/nginx/conf.d:ro
       - ./snippets:/etc/nginx/snippets:ro
-      - ../certbot/conf:/etc/letsencrypt:ro
-      - ../certbot/www:/var/www/certbot:ro
+      # _certs should live in project root
+      - ../../../_certs:/etc/nginx/ssl:ro
       - ../static:/var/www/html:ro

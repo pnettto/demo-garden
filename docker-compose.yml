@@ -1,7 +1,6 @@
 name: demos
 include:
   - ./services/web-server/nginx/docker-compose.yml
-  - ./services/web-server/certbot/docker-compose.yml
   - ./services/lazy-manager/docker-compose.yml
   - ./services/python/python-go-test/docker-compose.yml
   - ./services/go/go-worker/docker-compose.yml
