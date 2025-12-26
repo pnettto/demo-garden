@@ -9,5 +9,5 @@ services:
       - ./conf.d:/etc/nginx/conf.d:ro
       - ./snippets:/etc/nginx/snippets:ro
       # _certs live in project root
-      - ../../../_certs:/etc/nginx/ssl:ro
+      - ../../_certs:/etc/nginx/ssl:ro
       - ../static:/var/www/html:ro
