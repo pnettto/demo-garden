@@ -51,7 +51,13 @@ sudo swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 # Start SSL certs
-docker compose run --rm certbot certonly --webroot --webroot-path /var/www/certbot -d demos.pnetto.com
+docker compose run --rm --entrypoint "certbot" certbot certonly \
+  --webroot \
+  --webroot-path=/var/www/certbot \
+  --email pedro@pnetto.com \
+  --agree-tos \
+  --no-eff-email \
+  -d demos.pnetto.com
 docker compose exec nginx nginx -s reload
 
 # Docker management aliases
