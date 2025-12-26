@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
+
 	"net/url"
 	"os"
 	"os/exec"
@@ -131,7 +133,7 @@ func findServiceDirectory(serviceName string) (string, error) {
 	return "", fmt.Errorf("service %s not found in any included compose file", serviceName)
 }
 
-func ensureServiceRunning(ctx context.Context, serviceName string) error {
+func ensureServiceRunning(ctx context.Context, serviceName string, targetPort string) error {
 	c, err := getContainer(ctx, serviceName)
 	if err != nil {
 		return err
@@ -181,7 +183,10 @@ func ensureServiceRunning(ctx context.Context, serviceName string) error {
 			for i := 0; i < 30; i++ {
 				c, err = getContainer(ctx, serviceName)
 				if err == nil && c != nil && c.State == "running" {
-					time.Sleep(2 * time.Second) // Grace period
+					// Container is running, now wait for the port to be open
+					if err := waitForPort(fmt.Sprintf("%s:%s", serviceName, targetPort), 30*time.Second); err != nil {
+						return fmt.Errorf("service %s running but port %s not ready: %w", serviceName, targetPort, err)
+					}
 					return nil
 				}
 				time.Sleep(1 * time.Second)
@@ -190,6 +195,19 @@ func ensureServiceRunning(ctx context.Context, serviceName string) error {
 		}
 	}
 	return nil
+}
+
+func waitForPort(addr string, timeout time.Duration) error {
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		conn, err := net.DialTimeout("tcp", addr, 1*time.Second)
+		if err == nil {
+			conn.Close()
+			return nil
+		}
+		time.Sleep(500 * time.Millisecond)
+	}
+	return fmt.Errorf("timeout waiting for %s", addr)
 }
 
 func proxyHandler(w http.ResponseWriter, r *http.Request) {
@@ -205,7 +223,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	defer updateActivity(targetService, -1)
 
 	ctx := r.Context()
-	if err := ensureServiceRunning(ctx, targetService); err != nil {
+	if err := ensureServiceRunning(ctx, targetService, targetPort); err != nil {
 		log.Printf("Error ensuring service %s is running: %v", targetService, err)
 		http.Error(w, fmt.Sprintf("Proxy error: %v", err), http.StatusBadGateway)
 		return
