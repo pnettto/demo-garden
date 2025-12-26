@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <base href="/deno-test/">
         <title>Deno UI</title>
         <style>
             body {
@@ -59,7 +60,7 @@
                     btn.textContent = "Fetching...";
                     try {
                         // In the Nginx setup, /my-deno/api/info maps to /api/info in Deno
-                        const res = await fetch("./api/info");
+                        const res = await fetch("api/info");
                         const data = await res.json();
                         document.getElementById("output")
                             .textContent = JSON.stringify(
