@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         try {
             // Using absolute path because we'll proxy it via Nginx
-            const response = await fetch("/process-data");
+            const response = await fetch("/python-go-test");
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
