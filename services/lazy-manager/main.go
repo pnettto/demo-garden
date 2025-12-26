@@ -170,7 +170,7 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 				log.Printf("Optional .env file not found at %s, skipping.", fullEnvPath)
 			}
 
-			args = append(args, "up", "-d", "--build", serviceName)
+			args = append(args, "up", "-d", serviceName)
 
 			log.Printf("-----------")
 			log.Printf("args")
