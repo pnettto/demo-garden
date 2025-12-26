@@ -18,6 +18,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -82,6 +83,54 @@ func getContainer(ctx context.Context, serviceName string) (*types.Container, er
 	return &containers[0], nil
 }
 
+// findServiceDirectory finds the directory containing a service's docker-compose.yml
+func findServiceDirectory(serviceName string) (string, error) {
+	mainComposePath := filepath.Join(demosDir, "docker-compose.yml")
+
+	// Read main compose file
+	data, err := os.ReadFile(mainComposePath)
+	if err != nil {
+		return "", fmt.Errorf("failed to read main compose file: %w", err)
+	}
+
+	// Parse to get includes
+	var mainCompose struct {
+		Include []string `yaml:"include"`
+	}
+	if err := yaml.Unmarshal(data, &mainCompose); err != nil {
+		return "", fmt.Errorf("failed to parse main compose file: %w", err)
+	}
+
+	// Search each included compose file for the service
+	for _, includePath := range mainCompose.Include {
+		fullPath := filepath.Join(demosDir, includePath)
+
+		// Read included compose file
+		includeData, err := os.ReadFile(fullPath)
+		if err != nil {
+			log.Printf("Warning: could not read %s: %v", fullPath, err)
+			continue
+		}
+
+		// Parse to check if it contains the service
+		var includeCompose struct {
+			Services map[string]interface{} `yaml:"services"`
+		}
+		if err := yaml.Unmarshal(includeData, &includeCompose); err != nil {
+			log.Printf("Warning: could not parse %s: %v", fullPath, err)
+			continue
+		}
+
+		// Check if this compose file defines the service
+		if _, exists := includeCompose.Services[serviceName]; exists {
+			// Return the directory containing this compose file
+			return filepath.Dir(fullPath), nil
+		}
+	}
+
+	return "", fmt.Errorf("service %s not found in any included compose file", serviceName)
+}
+
 func ensureServiceRunning(ctx context.Context, serviceName string) error {
 	c, err := getContainer(ctx, serviceName)
 	if err != nil {
@@ -106,21 +155,16 @@ func ensureServiceRunning(ctx context.Context, serviceName string) error {
 			args := []string{"compose", "-p", projectName, "--profile", "lazy",
 				"-f", filepath.Join(demosDir, "docker-compose.yml")}
 
-			// Check for service-specific .env file
-			// Common service paths to check
-			servicePaths := []string{
-				filepath.Join(demosDir, "services", "python", serviceName, ".env"),
-				filepath.Join(demosDir, "services", "go", serviceName, ".env"),
-				filepath.Join(demosDir, "services", "deno", serviceName, ".env"),
-				filepath.Join(demosDir, "services", serviceName, ".env"),
+			envPath, err := findServiceDirectory(serviceName)
+			if err != nil {
+				log.Printf("Error: %v", err)
+				return err
 			}
-
-			for _, envPath := range servicePaths {
-				if _, err := os.Stat(envPath); err == nil {
-					log.Printf("Found .env file for %s at: %s", serviceName, envPath)
-					args = append(args, "--env-file", envPath)
-					break
-				}
+			fullEnvPath := filepath.Join(envPath, ".env")
+			if _, err := os.Stat(fullEnvPath); err == nil {
+				args = append(args, "--env-file", fullEnvPath)
+			} else {
+				log.Printf("Optional .env file not found at %s, skipping.", fullEnvPath)
 			}
 
 			args = append(args, "up", "-d", "--build", serviceName)
