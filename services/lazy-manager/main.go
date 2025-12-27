@@ -240,33 +240,40 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	targetURL, _ := url.Parse(fmt.Sprintf("http://%s:%s", targetService, targetPort))
+    proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
-	proxy := httputil.NewSingleHostReverseProxy(targetURL)
-
-	// Custom Director to handle headers like the Python version
 	originalDirector := proxy.Director
+
 	proxy.Director = func(req *http.Request) {
 		originalDirector(req)
-		req.Header.Del("host")
 		req.Header.Del("x-target-service")
 		req.Header.Del("x-target-port")
-		req.Header.Del("accept-encoding")
+		
+		// Ensure WebSocket headers are passed to the backend
+		if strings.ToLower(req.Header.Get("Connection")) == "upgrade" && 
+		strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
+			req.Header.Set("Connection", "Upgrade")
+			req.Header.Set("Upgrade", "websocket")
+		}
 	}
 
-	// Python version filtered response headers
 	proxy.ModifyResponse = func(resp *http.Response) error {
-		resp.Header.Del("Connection")
+		// If it's a WebSocket upgrade, do NOT strip headers
+		if resp.StatusCode == http.StatusSwitchingProtocols {
+			return nil
+		}
+
+		// Existing deletions for standard HTTP
 		resp.Header.Del("Keep-Alive")
 		resp.Header.Del("Proxy-Authenticate")
 		resp.Header.Del("Proxy-Authorization")
 		resp.Header.Del("TE")
 		resp.Header.Del("Trailers")
 		resp.Header.Del("Transfer-Encoding")
-		resp.Header.Del("Upgrade")
 		return nil
 	}
 
-	proxy.ServeHTTP(w, r)
+    proxy.ServeHTTP(w, r)
 }
 
 func monitorServices() {
