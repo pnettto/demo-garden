@@ -47,7 +47,17 @@ jobs:
           passphrase: ${{ secrets.VM_PASSPHRASE }}
           script: |
             cd /home/${{ secrets.VM_USER }}/demos
-            git pull origin main
+
+            # 1. Force-reset the local repo to match the remote main branch
+            git fetch origin main
+            git reset --hard origin/main
+
+            # 2. Authenticate and pull new images
             echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u pnettto --password-stdin
-            docker compose pull lazy-manager
-            docker compose up -d --remove-orphans
+            docker compose pull
+
+            # 3. Recreate containers to ensure they use the new image and files
+            docker compose up -d --force-recreate --remove-orphans
+
+            # 4. Clean up old unused images to save disk space on e2-micro
+            docker image prune -f
