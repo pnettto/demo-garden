@@ -1,7 +1,9 @@
 services:
   code-executor:
     runtime: runsc
-    build: .
+    image: ghcr.io/pnettto/code-executor:latest
+    build:
+      context: .
     profiles:
       - lazy
     labels:
