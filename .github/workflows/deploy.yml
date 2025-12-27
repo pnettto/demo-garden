@@ -48,7 +48,7 @@ jobs:
           passphrase: ${{ secrets.VM_PASSPHRASE }}
           script: |
             cd /home/${{ secrets.VM_USER }}/demos
-            git fetch origin main
+            git fetch https://${{ secrets.GH_PAT }}@github.com/pnettto/demos.git main
             git reset --hard origin/main
             git clean -fd -e "**/.env"  # Keep envs
 
