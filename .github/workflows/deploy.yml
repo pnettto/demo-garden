@@ -23,17 +23,24 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Binary
+      - name: Build Lazy Manager Binary
         run: |
           cd services/lazy-manager
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o manager .
 
-      - name: Package Docker
+      - name: Package Lazy Manager
         uses: docker/build-push-action@v5
         with:
           context: ./services/lazy-manager
           push: true
           tags: ghcr.io/pnettto/lazy-manager:latest
+      
+      - name: Package Instant Graph Maker
+        uses: docker/build-push-action@v5
+        with:
+          context: ./services/instant-graph-maker
+          push: true
+          tags: ghcr.io/pnettto/instant-graph-maker:latest
 
   deploy:
     needs: build-and-push
