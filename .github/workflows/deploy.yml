@@ -12,6 +12,13 @@ jobs:
       - uses: actions/setup-go@v5
         with: { go-version: '1.24' }
 
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Binary
         run: |
           cd services/lazy-manager
