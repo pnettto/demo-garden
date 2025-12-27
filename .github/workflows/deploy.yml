@@ -49,7 +49,7 @@ jobs:
           script: |
             cd /home/${{ secrets.VM_USER }}/demos
             git fetch https://${{ secrets.GH_PAT }}@github.com/pnettto/demos.git main
-            git reset --hard origin/main
+            git reset --hard FETCH_HEAD
             git clean -fd -e "**/.env"  # Keep envs
 
             echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u pnettto --password-stdin
