@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -26,27 +30,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.24'
-          cache: true
-          cache-dependency-path: services/lazy-manager/go.sum
-
-      - name: Build Lazy Manager Binary
-        run: |
-          cd services/lazy-manager
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o manager .
-
-      - name: Package Lazy Manager
+      - name: Build and Push
         uses: docker/build-push-action@v5
         with:
           context: ./services/lazy-manager
+          platforms: linux/amd64
           push: true
           tags: ghcr.io/pnettto/lazy-manager:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
