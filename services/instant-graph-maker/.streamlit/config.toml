@@ -1,0 +1,25 @@
+[theme]
+base = "dark"
+
+# General color setup
+textColor = "#e2e8f0ff"
+primaryColor = "#ffd600ff"
+backgroundColor = "#142542ff"
+secondaryBackgroundColor = "#0f172bff"
+
+# Widgets
+showWidgetBorder = true
+borderColor = "#314158ff"
+
+# Dataframes
+dataframeHeaderBackgroundColor = "#1d293dff"
+
+# Base text
+font = "'Source Code Pro':https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,300..900;1,300..900&display=swap"
+baseFontWeight = 400
+baseFontSize = 16
+
+# Heading text
+headingFont = "Source Code Pro"
+headingFontWeights = [700, 700, 700, 700, 700, 700]
+headingFontSizes = ["2.5rem", "1.5rem", "1.25rem"]
