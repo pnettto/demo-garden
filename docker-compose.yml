@@ -5,4 +5,3 @@ include:
   - ./services/parallelism/docker-compose.yml
   - ./services/code-executor/docker-compose.yml
   - ./services/deno-test/docker-compose.yml
-  - ./services/instant-graph-maker/docker-compose.yml

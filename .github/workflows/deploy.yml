@@ -40,15 +40,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       
-      - name: Package Instant Graph Maker
-        uses: docker/build-push-action@v5
-        with:
-          context: ./services/instant-graph-maker
-          push: true
-          tags: ghcr.io/pnettto/instant-graph-maker:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
