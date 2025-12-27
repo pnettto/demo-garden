@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Macro Compositions</title>
+  <!-- p5.js library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <!-- p5.sound library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: black;
+      color: #ccc;
+    }
+
+    #dropdown-container {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+
+    #folder-selector {
+      background-color: #333;
+      color: #ccc;
+      border: 1px solid #555;
+      padding: 5px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="dropdown-container">
+    <select id="folder-selector">
+      <option value="gouache">Gouache</option>
+      <option value="plants">Plants</option>
+      <option value="roots">Roots</option>
+      <option value="stockholm">Stockholm</option>
+    </select>
+  </div>
+  <script>
+    const imagesFolderBase = 'images/';
+    let imagesFolder = imagesFolderBase + 'gouache';
+    const numImages = 14;
+    const defaultDurations = { delay: 0, fadeIn: 4, linger: 4, fadeOut: 4 };
+
+    let imgs = [];
+    let currentFragments = [];
+    let compositionStartTime = 0;
+    let compositionDuration = 0;
+    let lastCompositionIndex = -1;
+
+    const compositions = [
+      {
+        // Squares in the middle, fading into each other
+        fragments: [
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { fadeIn: 4, linger: 0, fadeOut: 4 } },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 4, fadeIn: 4, linger: 0, fadeOut: 4 } },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 8, fadeIn: 4, linger: 0, fadeOut: 4 } },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 12, fadeIn: 4, linger: 0, fadeOut: 4 } },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 16, fadeIn: 4, linger: 0, fadeOut: 4 } },
+        ]
+      },
+      {
+        // Two fragments made of the same source side by side
+        fragments: [
+          { orientation: 'square', size: 'large', offset: { x: -0.525, y: 0 }, anchor: { x: 'center', y: 'center' } },
+          { orientation: 'square', size: 'large', offset: { x: 0.525, y: 0 }, anchor: { x: 'center', y: 'center' } },
+        ],
+        sameSource: true
+      },
+      {
+        // Blend of large landscapes in the middle (screen blend, same source)
+        fragments: [
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.7, blendMode: 'screen', duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.7, blendMode: 'screen', duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.7, blendMode: 'screen', duration: { fadeOut: 2 } },
+        ],
+        sameSource: true
+      },
+      {
+        //   // Blend of 6 large landscapes in the middle (screen blend, different sources)
+        fragments: [
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, blendMode: 'overlay', duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, blendMode: 'overlay', duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, blendMode: 'overlay', duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, blendMode: 'overlay', duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, blendMode: 'overlay', duration: { fadeOut: 2 } },
+        ]
+      },
+      {
+        //   // Blend of 3 large landscapes in the middle (screen blend, different sources)
+        fragments: [
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, blendMode: 'overlay', duration: { fadeOut: 2 } },
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, blendMode: 'overlay', duration: { fadeOut: 2 } },
+        ]
+      },
+      {
+        // One large landscape appears
+        fragments: [
+          { orientation: 'landscape', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { fadeIn: 4, linger: 4, fadeOut: 2 } },
+        ]
+      },
+      {
+        // Portrait in the middle, squares to the side
+        fragments: [
+          { orientation: 'portrait', size: 'large', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.8, duration: { fadeIn: 3, linger: 5, fadeOut: 3 } },
+          { orientation: 'square', size: 'xlarge', offset: { x: -0.3, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.8, duration: { fadeIn: 4, linger: 4, fadeOut: 3 }, blendMode: 'screen' },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0.3, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.8, duration: { fadeIn: 4, linger: 4, fadeOut: 3 }, blendMode: 'screen' },
+        ]
+      },
+      {
+        // Squares wash to the right
+        fragments: [
+          { orientation: 'square', size: 'xlarge', offset: { x: -0.8, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 0, fadeIn: 0.5, linger: 4, fadeOut: 4 }, opacity: 0.5 },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 0.1, fadeIn: 0.5, linger: 3.6, fadeOut: 4 }, opacity: 0.5, blendMode: 'screen' },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0.4, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 0.2, fadeIn: 0.5, linger: 3.2, fadeOut: 4 }, opacity: 0.5, blendMode: 'screen' },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0.8, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 0.3, fadeIn: 0.5, linger: 2.8, fadeOut: 4 }, opacity: 0.5, blendMode: 'screen' },
+        ]
+      },
+      {
+        // Two smaller squares on the left and right introduce the larger one on the center
+        fragments: [
+          { orientation: 'square', size: 'large', offset: { x: 0.1, y: 0 }, anchor: { x: 'left', y: 'center' }, duration: { fadeIn: 2, linger: 1.5, fadeOut: 3 } },
+          { orientation: 'square', size: 'large', offset: { x: -0.1, y: 0 }, anchor: { x: 'right', y: 'center' }, duration: { fadeIn: 2, linger: 1.5, fadeOut: 3 } },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 1, fadeIn: 2, linger: 3, fadeOut: 3 }, blendMode: 'screen' }
+        ]
+      },
+      {
+        // Large squares interpolate side-by-side
+        fragments: [
+          { orientation: 'square', size: 'xlarge', offset: { x: -0.5, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.7, duration: { delay: 2 }, blendMode: 'screen' },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.7, blendMode: 'screen' },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0.5, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.7, duration: { delay: 2 }, blendMode: 'screen' },
+        ]
+      },
+      {
+        // Large portraits interpolate side-by-side
+        fragments: [
+          { orientation: 'portrait', size: 'xlarge', offset: { x: -1, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.8, duration: { delay: 0.5 } },
+          { orientation: 'portrait', size: 'xlarge', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.8, duration: { delay: 1.5 }, blendMode: 'screen' },
+          { orientation: 'portrait', size: 'xlarge', offset: { x: 1, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.8, duration: { delay: 2 }, blendMode: 'screen' }
+        ]
+      },
+      {
+        // Two squares on the sides introduce an interpolation of portraits in the center, same source
+        fragments: [
+          { orientation: 'square', size: 'large', offset: { x: 0.2, y: 0 }, anchor: { x: 'left', y: 'center' }, opacity: 0.8, duration: { delay: 0.5 } },
+          { orientation: 'square', size: 'large', offset: { x: -0.2, y: 0 }, anchor: { x: 'right', y: 'center' }, opacity: 0.8, duration: { delay: 1.5, linger: 3 } },
+          { orientation: 'portrait', size: 'medium', offset: { x: -0.05, y: -0.02 }, anchor: { x: 'center', y: 'center' }, duration: { delay: 4, fadeIn: 4, linger: 3, fadeOut: 6 } },
+          { orientation: 'portrait', size: 'medium', offset: { x: 0.05, y: 0.02 }, anchor: { x: 'center', y: 'center' }, opacity: 0.6, duration: { delay: 4, fadeIn: 4, linger: 4, fadeOut: 6 }, blendMode: 'screen' }
+        ],
+        sameSource: true
+      },
+      {
+        // Portraits interpolate in the middle
+        fragments: [
+          { orientation: 'portrait', size: 'medium', offset: { x: -0.6, y: 0 }, anchor: { x: 'center', y: 'center' }, duration: { fadeIn: 4, linger: 3, fadeOut: 6 } },
+          { orientation: 'portrait', size: 'medium', offset: { x: -0.3, y: -0.02 }, anchor: { x: 'center', y: 'center' }, duration: { fadeIn: 4, linger: 3, fadeOut: 6 }, blendMode: 'screen' },
+          { orientation: 'portrait', size: 'medium', offset: { x: 0.3, y: 0.02 }, anchor: { x: 'center', y: 'center' }, opacity: 0.6, duration: { fadeIn: 4, linger: 4, fadeOut: 6 }, blendMode: 'screen' },
+          { orientation: 'portrait', size: 'medium', offset: { x: 0.6, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.6, duration: { fadeIn: 4, linger: 4, fadeOut: 6 }, blendMode: 'screen' },
+        ]
+      },
+      {
+        // Two large squares interpolate side by side in the center
+        fragments: [
+          { orientation: 'square', size: 'xlarge', offset: { x: -0.2, y: 0 }, anchor: { x: 'center', y: 'center' } },
+          { orientation: 'square', size: 'xlarge', offset: { x: 0.2, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.7 }
+        ]
+      },
+      {
+        // Square of squares, same source
+        fragments: [
+          { orientation: 'square', size: 'large', offset: { x: 0, y: -0.4 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: -0.6, y: -0.4 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: 0.6, y: -0.4 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: -0.6, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: 0.6, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: 0, y: 0.4 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: -0.6, y: 0.4 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+          { orientation: 'square', size: 'large', offset: { x: 0.6, y: 0.4 }, anchor: { x: 'center', y: 'center' }, opacity: 0.4, blendMode: 'screen' },
+        ], sameSource: true
+      },
+      {
+        // Square and portrait interpolate inthe middle while smaller squares appears on the right
+        fragments: [
+          { orientation: 'portrait', size: 'large', offset: { x: 0, y: 0 }, anchor: { x: 'center', y: 'center' } },
+          { orientation: 'square', size: 'large', offset: { x: -0.8, y: 0 }, anchor: { x: 'center', y: 'center' }, opacity: 0.9, blendMode: 'screen' },
+          { orientation: 'square', size: 'medium', offset: { x: -0.3, y: 0.05 }, anchor: { x: 'right', y: 'top' }, duration: { delay: 1, fadeIn: 2, linger: 2 }, blendMode: 'screen' },
+          { orientation: 'square', size: 'medium', offset: { x: -0.3, y: 0 }, anchor: { x: 'right', y: 'center' }, duration: { delay: 1.5, fadeIn: 2, linger: 2 }, blendMode: 'screen' },
+          { orientation: 'square', size: 'medium', offset: { x: -0.3, y: -0.05 }, anchor: { x: 'right', y: 'bottom' }, duration: { delay: 2, fadeIn: 2, linger: 2 }, blendMode: 'screen' },
+        ]
+      },
+    ];
+
+    function preload() {
+      imgs = []; // Clear previously loaded images
+      for (let i = 1; i <= numImages; i++) {
+        imgs.push(loadImage(imagesFolder + '/' + i + '.jpg'));
+      }
+
+      // Load the soundtrack
+      // soundtrack = loadSound('/abstract-macro-compositions/soundtrack.mp3');
+    }
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      noStroke();
+      imageMode(CENTER);
+      loadBlendModes()
+      startNextComposition();
+
+      // Play the soundtrack on loop
+      // soundtrack.loop();
+    }
+
+    function loadBlendModes() {
+      blendModes = {
+        'normal': BLEND,          // default
+        'blend': BLEND,           // default (alias)
+        'add': ADD,               // additive blending
+        'darkest': DARKEST,       // only the darkest color
+        'lightest': LIGHTEST,     // only the lightest color
+        'difference': DIFFERENCE, // subtracts colors from underlying image
+        'exclusion': EXCLUSION,   // similar to difference with lower contrast
+        'multiply': MULTIPLY,     // multiplies colors
+        'screen': SCREEN,         // *** opposite of multiply (lightens)
+        'overlay': OVERLAY,       // *** mix of multiply and screen
+        'hard_light': HARD_LIGHT, // similar to overlay but swapped
+        'soft_light': SOFT_LIGHT, // *** softer version of hard_light
+        'dodge': DODGE,           // lightens light areas
+        'burn': BURN,             // darkens dark areas
+        'replace': REPLACE,       // overwrites without blending
+        'subtract': SUBTRACT      // subtractive blending
+      };
+
+      return blendModes;
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+      currentFragments = generateFragments(currentComposition);
+    }
+
+    function draw() {
+      background(0);
+      const t = (millis() - compositionStartTime) / 1000;
+
+      if (t >= compositionDuration) {
+        startNextComposition();
+        return;
+      }
+
+      // Draw each fragment.
+      for (let [i, frag] of currentFragments.entries()) {
+        const delayDuration = frag.duration.delay;
+        const fadeInDuration = frag.duration.fadeIn;
+        const lingerDuration = frag.duration.linger;
+        const fadeOutDuration = frag.duration.fadeOut;
+        const fadeOutStart = delayDuration + fadeInDuration + lingerDuration;
+
+        let alpha = 255;
+
+        if (t < delayDuration) {
+          continue;
+        }
+
+        if (t < delayDuration + fadeInDuration) {
+          // Fade in
+          alpha = map(t, delayDuration, delayDuration + fadeInDuration, 0, 255);
+        } else if (t >= fadeOutStart) {
+          // Fade out
+          alpha = map(t, fadeOutStart, fadeOutStart + fadeOutDuration, 255, 0);
+        }
+
+        // Apply the fragment's opacity to the alpha value.
+        let finalAlpha = alpha * (frag.opacity || 1);
+
+        if (frag.blendMode) {
+          blendMode(blendModes[frag.blendMode]);
+        }
+
+        tint(255, finalAlpha);
+        push();
+
+        const animateY = map(t, 0, compositionDuration, 0, frag.drawH / 20)
+        let imgW = frag.drawW + animateY;
+        let imgH = frag.drawH + animateY;
+        let x = frag.pos.x - imgW / 2;
+        let y = frag.pos.y - imgH / 2;
+        const borderRadius = 3
+
+        drawingContext.beginPath();
+        drawingContext.moveTo(x + borderRadius, y);
+        drawingContext.lineTo(x + imgW - borderRadius, y);
+        drawingContext.quadraticCurveTo(x + imgW, y, x + imgW, y + borderRadius);
+        drawingContext.lineTo(x + imgW, y + imgH - borderRadius);
+        drawingContext.quadraticCurveTo(x + imgW, y + imgH, x + imgW - borderRadius, y + imgH);
+        drawingContext.lineTo(x + borderRadius, y + imgH);
+        drawingContext.quadraticCurveTo(x, y + imgH, x, y + imgH - borderRadius);
+        drawingContext.lineTo(x, y + borderRadius);
+        drawingContext.quadraticCurveTo(x, y, x + borderRadius, y);
+        drawingContext.closePath();
+        drawingContext.clip();
+
+        image(frag.img, frag.pos.x, frag.pos.y, imgW, imgH, frag.cropX, frag.cropY, frag.drawW, frag.drawH);
+
+        pop();
+
+        noTint();
+        blendMode(BLEND);
+      }
+    }
+
+    function startNextComposition() {
+      let newIndex;
+      do {
+        newIndex = floor(random(compositions.length));
+      } while (newIndex === lastCompositionIndex);
+
+      lastCompositionIndex = newIndex;
+      currentComposition = compositions[newIndex];
+      currentFragments = generateFragments(currentComposition);
+
+      let maxFragDuration = 0;
+      for (let frag of currentFragments) {
+        let fragDuration = 0;
+        fragDuration += frag.duration.delay;
+        fragDuration += frag.duration.fadeIn;
+        fragDuration += frag.duration.linger;
+        fragDuration += frag.duration.fadeOut;
+        if (fragDuration > maxFragDuration) maxFragDuration = fragDuration;
+      }
+
+      compositionDuration = maxFragDuration;
+      compositionStartTime = millis();
+    }
+
+    // Generate fragment objects from the composition definition
+    function generateFragments(composition) {
+      let frags = [];
+      let img;
+
+      for (const fragment of composition.fragments) {
+        let dimensions = getTargetDimensions(fragment);
+        img = composition.sameSource ? img || random(imgs) : random(imgs);
+        let availableW = img.width;
+        let availableH = img.height;
+
+        // Maintain the target aspect ratio
+        let aspect = dimensions.w / dimensions.h;
+        let maxCropW, maxCropH;
+        if (availableW / availableH >= aspect) {
+          maxCropH = availableH;
+          maxCropW = availableH * aspect;
+        } else {
+          maxCropW = availableW;
+          maxCropH = availableW / aspect;
+        }
+        let scale = min([1, maxCropW / dimensions.w, maxCropH / dimensions.h]);
+        let drawW = dimensions.w * scale;
+        let drawH = dimensions.h * scale;
+
+        let cropX = random(0, availableW - drawW);
+        let cropY = random(0, availableH - drawH);
+
+        let pos = getFragmentPosition(fragment, drawW, drawH);
+
+        let frag = {
+          img: img,
+          cropX: cropX,
+          cropY: cropY,
+          drawW: drawW,
+          drawH: drawH,
+          pos: pos,
+          blendMode: fragment.blendMode || null,
+          opacity: fragment.opacity || 1,
+          duration: { ...defaultDurations, ...fragment.duration }
+        };
+
+        frags.push(frag);
+      }
+
+      return frags;
+    }
+
+    // Determine target drawn dimensions based on fragment orientation and size
+    function getTargetDimensions(fragDef) {
+      let w, h;
+      const sizeMultipliers = {
+        xlarge: 0.75,
+        large: 0.5,
+        medium: 0.3,
+        small: 0.15
+      };
+
+      const orientationHandlers = {
+        square: (size) => {
+          const side = min(windowWidth, windowHeight) * (sizeMultipliers[size] || 0.25);
+          return { w: side, h: side };
+        },
+        portrait: (size) => {
+          const w = windowWidth * (sizeMultipliers[size] || 0.15);
+          return { w, h: w * 1.5 };
+        },
+        landscape: (size) => {
+          const h = windowHeight * (sizeMultipliers[size] || 0.15);
+          return { w: h * 1.5, h };
+        },
+        full: () => ({
+          w: windowWidth - 64,
+          h: windowHeight - 64
+        })
+      };
+
+      const handler = orientationHandlers[fragDef.orientation || 'square'];
+      ({ w, h } = handler(fragDef.size || 'medium'));
+      return { w, h };
+    }
+
+    // Compute the fragment's position based on its anchor and offset
+    function getFragmentPosition(fragDef, fragW, fragH) {
+      const anchorMappings = {
+        x: {
+          center: () => windowWidth / 2,
+          left: () => fragW / 2,
+          right: () => windowWidth - fragW / 2
+        },
+        y: {
+          center: () => windowHeight / 2,
+          top: () => fragH / 2,
+          bottom: () => windowHeight - fragH / 2
+        }
+      };
+
+      const baseX = (anchorMappings.x[fragDef.anchor.x || 'center'])();
+      const baseY = (anchorMappings.y[fragDef.anchor.y || 'center'])();
+
+      const offsetX = (fragDef.offset && fragDef.offset.x) ? fragDef.offset.x * fragW : 0;
+      const offsetY = (fragDef.offset && fragDef.offset.y) ? fragDef.offset.y * fragH : 0;
+
+      let posX = baseX + offsetX;
+      let posY = baseY + offsetY;
+
+      posX = constrain(posX, fragW / 2, windowWidth - fragW / 2);
+      posY = constrain(posY, fragH / 2, windowHeight - fragH / 2);
+
+      return { x: posX, y: posY };
+    }
+
+    // Toggle soundtrack playback on mouse click
+    // function mousePressed() {
+    //   if (soundtrack && soundtrack.isPlaying()) {
+    //     soundtrack.pause();
+    //   } else if (soundtrack) {
+    //     soundtrack.loop();
+    //   }
+    // }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('folder-selector').addEventListener('change', (event) => {
+        console.log('Selected folder:', event.target.value);
+        imagesFolder = imagesFolderBase + event.target.value;
+        imgs = [];
+        preload();
+      });
+    });
+  </script>
+</body>
+
+</html>
