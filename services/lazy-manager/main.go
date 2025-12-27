@@ -172,11 +172,6 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 
 			args = append(args, "up", "-d", serviceName)
 
-			log.Printf("-----------")
-			log.Printf("args")
-			log.Print(args)
-			log.Printf("-----------")
-
 			cmd := exec.Command("docker", args...)
 			cmd.Dir = demosDir
 			cmd.Stdout = os.Stdout
