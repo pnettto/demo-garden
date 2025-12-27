@@ -11,3 +11,4 @@ services:
       # _certs live in project root
       - ../../_certs:/etc/nginx/ssl:ro
       - ../static:/var/www/html:ro
+      - ./favicon.svg:/var/www/static/favicon.svg:ro

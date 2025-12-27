@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Executor - Demo Garden</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500&family=Inter:wght@400;500;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../base.css">
+</head>
+<body class="app-layout">
+    <nav class="nav">
+        <a href="/" class="nav-link">← Garden</a>
+        <h1>Code Executor</h1>
+        <div style="width: 40px;"></div>
+    </nav>
+
+    <main class="main-content">
+        <aside class="app-sidebar">
+            <div class="input-group">
+                <span class="label">Runtime</span>
+                <select id="lang">
+                    <option value="python">Python 3</option>
+                    <option value="node">Node.js</option>
+                    <option value="deno">Deno (TS)</option>
+                    <option value="sql">SQLite</option>
+                    <option value="bash">Bash</option>
+                </select>
+            </div>
+            
+            <button class="btn" id="run-btn">Execute</button>
+
+            <div style="margin-top: auto; font-size: 13px; color: var(--text-dim);">
+                <span class="label">System</span>
+                <p>Bubblewrap Sandbox<br>64MB RAM Limit<br>5s Timeout</p>
+            </div>
+        </aside>
+
+        <section class="app-view">
+            <span class="label" style="margin-bottom: 8px;">Source Code</span>
+            <textarea id="code" spellcheck="false" style="flex: 1; font-family: 'Fira Code', monospace; margin-bottom: 24px; background: #000;">print("Hello from the Garden! 🪴")</textarea>
+            
+            <span class="label" style="margin-bottom: 8px;">Console</span>
+            <pre class="console" id="output">System idle.</pre>
+        </section>
+    </main>
+
+    <script>
+        const langSelect = document.getElementById('lang');
+        const codeArea = document.getElementById('code');
+        const runBtn = document.getElementById('run-btn');
+        const output = document.getElementById('output');
+
+        const snippets = {
+            python: 'print("Hello from the Garden! 🪴")\nimport sys\nprint(f"Python Version: {sys.version.split()[0]}")',
+            node: 'console.log("Hello from Node! 🚀");\nconsole.log("Process version:", process.version);',
+            deno: 'console.log("Hello from Deno! 🦕");\nconsole.log("Deno version:", Deno.version.deno);',
+            sql: 'CREATE TABLE users (id INTEGER, name TEXT);\nINSERT INTO users VALUES (1, "Alice");\nSELECT * FROM users;',
+            bash: 'echo "System uptime: $(uptime -p)"'
+        };
+
+        codeArea.value = snippets.python;
+        langSelect.addEventListener('change', () => codeArea.value = snippets[langSelect.value]);
+
+        runBtn.addEventListener('click', async () => {
+            runBtn.disabled = true;
+            output.textContent = 'Executing...';
+            output.style.color = '#fbbf24';
+            
+            try {
+                const response = await fetch('/code-executor/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ lang: langSelect.value, code: codeArea.value })
+                });
+                const data = await response.json();
+                
+                if (data.error) {
+                    output.textContent = data.error;
+                    output.style.color = '#f87171';
+                } else {
+                    output.textContent = data.stdout + (data.stderr ? '\n--- ERRORS ---\n' + data.stderr : '');
+                    output.style.color = '#4ade80';
+                }
+            } catch (err) {
+                output.textContent = 'Connection error.';
+                output.style.color = '#f87171';
+            } finally {
+                runBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

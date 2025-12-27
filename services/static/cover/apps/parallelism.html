@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parallelism Lab - Demo Garden</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500&family=Inter:wght@400;500;600&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../base.css">
+</head>
+<body class="app-layout">
+    <nav class="nav">
+        <a href="/" class="nav-link">← Garden</a>
+        <h1>Parallelism Lab</h1>
+        <div style="width: 40px;"></div>
+    </nav>
+
+    <main class="main-content">
+        <aside class="app-sidebar">
+            <span class="label">Metrics</span>
+            <div style="font-size: 13px; color: var(--text-dim);">
+                <p>Status: <span style="color: #4ade80">Online</span></p>
+                <p>Workers: Distributed Go</p>
+            </div>
+
+            <button class="btn" id="run-btn">Trigger Task</button>
+
+            <div style="margin-top: auto;">
+                <span class="label">Flow</span>
+                <p style="font-size: 12px; color: var(--text-dim); line-height: 1.4;">
+                    Python API &rarr; PostgreSQL &rarr; Go Worker
+                </p>
+            </div>
+        </aside>
+
+        <section class="app-view">
+            <span class="label" style="margin-bottom: 8px;">Activity Log</span>
+            <div class="console" id="output" style="color: #60a5fa;">Ready. Waiting for distributed task...</div>
+        </section>
+    </main>
+
+    <script>
+        const btn = document.getElementById('run-btn');
+        const output = document.getElementById('output');
+
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            const log = document.createElement('div');
+            log.textContent = `> Initiating task at ${new Date().toLocaleTimeString()}...`;
+            output.insertBefore(log, output.firstChild);
+
+            try {
+                const response = await fetch('/parallelism/');
+                const data = await response.json();
+                
+                const result = document.createElement('div');
+                result.style.marginTop = '8px';
+                result.style.padding = '12px';
+                result.style.background = '#111';
+                result.style.border = '1px solid #222';
+                result.innerHTML = `<pre style="color: #d1d5db">${JSON.stringify(data, null, 2)}</pre>`;
+                output.insertBefore(result, output.firstChild);
+            } catch (err) {
+                const error = document.createElement('div');
+                error.style.color = '#f87171';
+                error.textContent = '> Connection failed. Service might be sleeping.';
+                output.insertBefore(error, output.firstChild);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
