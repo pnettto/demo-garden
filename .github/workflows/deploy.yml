@@ -65,8 +65,8 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.VM_PASSPHRASE }}
           script: |
-            cd /home/${{ secrets.VM_USER }}/demo-garden
             mkdir -p /home/${{ secrets.VM_USER }}/demo-garden
+            cd /home/${{ secrets.VM_USER }}/demo-garden
             git fetch https://${{ secrets.GH_PAT }}@github.com/${{ github.actor }}/demo-garden.git main
             git reset --hard FETCH_HEAD
             git clean -fd -e "**/.env"
