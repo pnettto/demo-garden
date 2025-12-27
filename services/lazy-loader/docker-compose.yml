@@ -1,0 +1,16 @@
+services:
+  lazy-loader:
+    image: ghcr.io/pnettto/lazy-loader:latest
+    build:
+      context: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${PWD}:/demo-garden # PWD needed for the Github deployment
+    environment:
+      IDLE_TIMEOUT: 10
+      PROJECT_NAME: demo-garden
+      DEMO_GARDEN_DIR: /demo-garden
+      PYTHONUNBUFFERED: "1"
+    expose:
+      - "8001"
+    restart: unless-stopped

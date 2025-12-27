@@ -1,4 +1,4 @@
-module lazy-manager
+module lazy-loader
 
 go 1.24.0
 

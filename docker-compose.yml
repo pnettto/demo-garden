@@ -1,7 +1,7 @@
-name: demos
+name: demo-garden
 include:
   - ./services/nginx/docker-compose.yml
-  - ./services/lazy-manager/docker-compose.yml
+  - ./services/lazy-loader/docker-compose.yml
   - ./services/parallelism/docker-compose.yml
   - ./services/code-executor/docker-compose.yml
   - ./services/deno-test/docker-compose.yml

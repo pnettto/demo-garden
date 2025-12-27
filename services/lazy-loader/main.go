@@ -25,8 +25,8 @@ import (
 )
 
 var (
-	projectName     = getEnv("PROJECT_NAME", "demos")
-	demosDir        = getEnv("DEMOS_DIR", "/demos-dir")
+	projectName     = getEnv("PROJECT_NAME", "demo-garden")
+	demoGardenDir   = getEnv("DEMO_GARDEN_DIR", "/demo-garden")
 	idleTimeout     = getDurationEnv("IDLE_TIMEOUT", 10)
 	serviceActivity = make(map[string]time.Time)
 	serviceLocks    = make(map[string]*sync.Mutex)
@@ -88,7 +88,7 @@ func getContainer(ctx context.Context, serviceName string) (*types.Container, er
 
 // findServiceDirectory finds the directory containing a service's docker-compose.yml
 func findServiceDirectory(serviceName string) (string, error) {
-	mainComposePath := filepath.Join(demosDir, "docker-compose.yml")
+	mainComposePath := filepath.Join(demoGardenDir, "docker-compose.yml")
 
 	// Read main compose file
 	data, err := os.ReadFile(mainComposePath)
@@ -106,7 +106,7 @@ func findServiceDirectory(serviceName string) (string, error) {
 
 	// Search each included compose file for the service
 	for _, includePath := range mainCompose.Include {
-		fullPath := filepath.Join(demosDir, includePath)
+		fullPath := filepath.Join(demoGardenDir, includePath)
 
 		// Read included compose file
 		includeData, err := os.ReadFile(fullPath)
@@ -156,7 +156,7 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 
 			// Build base command
 			args := []string{"compose", "-p", projectName, "--profile", "lazy",
-				"-f", filepath.Join(demosDir, "docker-compose.yml")}
+				"-f", filepath.Join(demoGardenDir, "docker-compose.yml")}
 
 			envPath, err := findServiceDirectory(serviceName)
 			if err != nil {
@@ -173,7 +173,7 @@ func ensureServiceRunning(ctx context.Context, serviceName string, targetPort st
 			args = append(args, "up", "-d", serviceName)
 
 			cmd := exec.Command("docker", args...)
-			cmd.Dir = demosDir
+			cmd.Dir = demoGardenDir
 			cmd.Stdout = os.Stdout
 			cmd.Stderr = os.Stderr
 			if err := cmd.Run(); err != nil {
@@ -235,7 +235,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	targetURL, _ := url.Parse(fmt.Sprintf("http://%s:%s", targetService, targetPort))
-    proxy := httputil.NewSingleHostReverseProxy(targetURL)
+	proxy := httputil.NewSingleHostReverseProxy(targetURL)
 
 	originalDirector := proxy.Director
 
@@ -243,10 +243,10 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		originalDirector(req)
 		req.Header.Del("x-target-service")
 		req.Header.Del("x-target-port")
-		
+
 		// Ensure WebSocket headers are passed to the backend
-		if strings.ToLower(req.Header.Get("Connection")) == "upgrade" && 
-		strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
+		if strings.ToLower(req.Header.Get("Connection")) == "upgrade" &&
+			strings.ToLower(req.Header.Get("Upgrade")) == "websocket" {
 			req.Header.Set("Connection", "Upgrade")
 			req.Header.Set("Upgrade", "websocket")
 		}
@@ -268,7 +268,7 @@ func proxyHandler(w http.ResponseWriter, r *http.Request) {
 		return nil
 	}
 
-    proxy.ServeHTTP(w, r)
+	proxy.ServeHTTP(w, r)
 }
 
 func monitorServices() {
