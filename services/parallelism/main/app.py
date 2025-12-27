@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
     print("Attempting to connect to PostgreSQL and initialize data...")
     conn = None
     max_retries = 15
-    retry_delay = 5
+    retry_delay = 1
     
     for i in range(max_retries):
         try:
@@ -60,7 +60,7 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             print(f"Startup attempt {i+1} failed: {e}")
             if i < max_retries - 1:
-                print(f"Retrying in {retry_delay} seconds...")
+                print(f"Retrying in {retry_delay} second(s)...")
                 time.sleep(retry_delay)
             else:
                 print("Max retries reached. Startup failed.")
