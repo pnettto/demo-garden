@@ -34,6 +34,8 @@ jobs:
           context: ./services/lazy-manager
           push: true
           tags: ghcr.io/pnettto/lazy-manager:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       
       - name: Package Instant Graph Maker
         uses: docker/build-push-action@v5
@@ -41,6 +43,8 @@ jobs:
           context: ./services/instant-graph-maker
           push: true
           tags: ghcr.io/pnettto/instant-graph-maker:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
     needs: build-and-push
