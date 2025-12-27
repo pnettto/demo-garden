@@ -6,8 +6,8 @@
   --text: #d1d5db;
   --text-dim: #6b7280;
   --accent: #ffffff;
-  --radius: 4px; /* Shorter radius for a sleeker look */
-  --spacing: 24px;
+  --radius: 0.25rem;
+  --spacing: 1.5rem;
 }
 
 * {
@@ -16,8 +16,12 @@
   box-sizing: border-box;
 }
 
+html {
+  font-size: 20px;
+}
+
 body {
-  font-family: "Inter", -apple-system, system-ui, sans-serif;
+  font-family: "Google Sans Code", monospace;
   background-color: var(--bg);
   color: var(--text);
   line-height: 1.5;
@@ -27,7 +31,6 @@ body {
 h1,
 h2,
 h3 {
-  font-family: "Outfit", sans-serif;
   color: var(--accent);
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -39,45 +42,43 @@ a {
 }
 
 .container {
-  max-width: 900px;
+  max-width: 50rem;
   margin: 0 auto;
-  padding: 80px 24px;
+  padding: 4.5rem 1.5rem;
 }
 
 header {
-  margin-bottom: 64px;
+  margin-bottom: 3.5rem;
 }
 
 header h1 {
-  font-size: 24px;
-  margin-bottom: 8px;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 header p {
   color: var(--text-dim);
-  font-size: 14px;
+  font-size: 0.75rem;
 }
 
 section {
-  margin-bottom: 48px;
+  margin-bottom: 2.5rem;
 }
 
 .section-label {
-  font-size: 11px;
+  font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--text-dim);
-  margin-bottom: 24px;
+  margin-bottom: 1.5rem;
   display: block;
   font-weight: 600;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 1px; /* Minimal grid lines */
-  background-color: var(--border);
-  border: 1px solid var(--border);
+  grid-template-columns: repeat(auto-fill, minmax(14.5rem, 1fr));
+  gap: 0.5rem;
 }
 
 .card {
@@ -85,7 +86,7 @@ section {
   padding: var(--spacing);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .card:hover {
@@ -93,16 +94,15 @@ section {
 }
 
 .card h3 {
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 500;
 }
 
 .card p {
-  font-size: 13px;
+  font-size: 0.75rem;
   color: var(--text-dim);
 }
 
-/* App Showcase Layout */
 .app-layout {
   display: flex;
   flex-direction: column;
@@ -110,15 +110,15 @@ section {
 }
 
 .nav {
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  border-bottom: 0.0625rem solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .nav-link {
-  font-size: 13px;
+  font-size: 0.75rem;
   color: var(--text-dim);
 }
 
@@ -133,31 +133,30 @@ section {
 }
 
 .app-sidebar {
-  width: 300px;
-  border-right: 1px solid var(--border);
-  padding: 32px 24px;
+  width: 18.5rem;
+  border-right: 0.0625rem solid var(--border);
+  padding: 2rem 1.5rem;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 1.5rem;
 }
 
 .app-view {
   flex: 1;
   background: var(--bg);
-  padding: 24px;
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
 }
 
-/* Shared UI Components */
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0.5rem;
 }
 
 .label {
-  font-size: 11px;
+  font-size: 0.625rem;
   font-weight: 600;
   color: var(--text-dim);
   text-transform: uppercase;
@@ -166,13 +165,15 @@ section {
 
 select,
 textarea,
+button,
+input,
 .btn {
   background: var(--surface);
-  border: 1px solid var(--border);
+  border: 0.0625rem solid var(--border);
   color: var(--text);
-  padding: 10px 12px;
-  font-family: inherit;
-  font-size: 13px;
+  padding: 0.625rem 0.75rem;
+  font-family: "Google Sans Code", monospace;
+  font-size: 0.75rem;
   outline: none;
   border-radius: var(--radius);
 }
@@ -193,10 +194,9 @@ textarea,
 
 .console {
   background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 16px;
-  font-family: "Fira Code", monospace;
-  font-size: 13px;
+  border: 0.0625rem solid var(--border);
+  padding: 1rem;
+  font-size: 0.75rem;
   color: #4ade80;
   flex: 1;
   overflow-y: auto;
