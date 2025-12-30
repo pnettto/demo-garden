@@ -1,0 +1,3 @@
+[submodule "services/code-executor/code-executor"]
+	path = services/code-executor/code-executor
+	url = https://github.com/pnettto/code-executor.git
