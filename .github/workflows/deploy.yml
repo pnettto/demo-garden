@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v5
         with:
-          context: ./services/lazy-loader
+          context: ./src/services/lazy-loader
           platforms: linux/amd64
           push: true
           tags: ghcr.io/pnettto/lazy-loader:latest
@@ -44,7 +44,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v5
         with:
-          context: ./services/code-executor
+          context: ./src/services/code-executor
           platforms: linux/amd64
           push: true
           tags: ghcr.io/pnettto/code-executor:latest
@@ -72,7 +72,6 @@ jobs:
             git reset --hard FETCH_HEAD
             git submodule update --init --recursive
 
-            echo "${{ secrets.GH_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-            docker compose pull
-            docker compose up -d --no-build --force-recreate --remove-orphans
-            docker image prune -f
+            cd src
+            ./build
+            GH_PAT="${{ secrets.GH_PAT }}" GH_ACTOR="${{ github.actor }}" ./run_deploy.sh

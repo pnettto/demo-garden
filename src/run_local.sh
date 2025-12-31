@@ -3,8 +3,9 @@ set -e
 
 echo "Starting Base VM container..."
 
-# On Mac
-docker run --privileged -it \
+docker rm -f demo-garden || true
+
+docker run --privileged -d \
   --cgroupns host \
   -v "$(pwd):/workspace" \
   -v demo-garden-docker-data:/var/lib/docker \
@@ -12,5 +13,5 @@ docker run --privileged -it \
   -p 80:80 \
   -p 443:443 \
   --name demo-garden \
-  demo-garden \
+  demo-garden-image \
   bash -c "export DOCKER_HOST=unix:///var/run/docker.sock && docker compose --profile lazy build && docker compose up"

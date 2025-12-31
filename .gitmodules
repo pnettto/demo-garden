@@ -1,3 +1,6 @@
 [submodule "src/services/code-executor/code-executor"]
     path = src/services/code-executor/code-executor
     url = https://github.com/pnettto/code-executor.git
+[submodule "src/services/code-executor/submodule"]
+	path = src/services/code-executor/submodule
+	url = https://github.com/pnettto/code-executor.git
