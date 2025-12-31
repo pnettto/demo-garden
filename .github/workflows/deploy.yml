@@ -44,7 +44,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: docker/build-push-action@v5
         with:
-          context: ./src/services/code-executor
+          context: ./src/services/code-executor/submomdule
           platforms: linux/amd64
           push: true
           tags: ghcr.io/pnettto/code-executor:latest
