@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+echo "Stopping existing containers..."
+docker stop demo-garden 2>/dev/null || true
+docker rm demo-garden 2>/dev/null || true
+
 echo "Starting Base VM container..."
 
 docker rm -f demo-garden || true
