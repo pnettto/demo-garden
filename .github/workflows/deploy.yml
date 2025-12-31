@@ -21,12 +21,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate image tag
+        id: meta
+        run: echo "tag=ghcr.io/pnettto/lazy-loader:$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - uses: docker/build-push-action@v5
         with:
           context: ./src/services/lazy-loader
           platforms: linux/amd64
           push: true
-          tags: ghcr.io/pnettto/lazy-loader:latest
+          tags: |
+            ${{ steps.meta.outputs.tag }}
+            ghcr.io/pnettto/lazy-loader:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -47,12 +52,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate image tag
+        id: meta
+        run: echo "tag=ghcr.io/pnettto/code-executor:$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
       - uses: docker/build-push-action@v5
         with:
           context: ./src/services/code-executor/submodule
           platforms: linux/amd64
           push: true
-          tags: ghcr.io/pnettto/code-executor:latest
+          tags: |
+            ${{ steps.meta.outputs.tag }}
+            ghcr.io/pnettto/code-executor:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

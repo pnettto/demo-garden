@@ -20,4 +20,4 @@ docker run --privileged -d \
           docker compose pull && \
           export DOCKER_HOST=unix:///var/run/docker.sock && \ 
           docker compose up -d --no-build --force-recreate --remove-orphans \ 
-          docker image prune -f
+          docker image prune -f"
