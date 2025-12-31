@@ -1,0 +1,18 @@
+services:
+  code-executor:
+    build:
+      context: .
+    working_dir: /workspace
+    tmpfs:
+      - /workspace:size=32M,mode=1777,nr_inodes=100
+      - /tmp:size=32M,mode=1777,nr_inodes=100
+    privileged: true
+    ports:
+      - "8000:8000"
+    restart: on-failure
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+          pids: 50
