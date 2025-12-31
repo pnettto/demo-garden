@@ -78,5 +78,5 @@ jobs:
             git submodule update --init --recursive
 
             cd src
-            ./build
+            ./build.sh
             GH_PAT="${{ secrets.GH_PAT }}" GH_ACTOR="${{ github.actor }}" ./run_deploy.sh
