@@ -6,7 +6,6 @@ on:
     paths:
       - "src/**"
       - ".github/workflows/**"
-      - "docker-compose.yml"
 
 permissions:
   contents: read
@@ -129,7 +128,7 @@ jobs:
 
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
             docker compose pull && \
-            docker compose build --all-resources && \
+            docker compose build --all && \
             docker compose up -d --remove-orphans && \
             docker image prune -f
 
