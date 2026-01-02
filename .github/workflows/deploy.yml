@@ -1,12 +1,36 @@
 name: Deploy to VM
+
 on:
   push:
     branches: [main]
+    paths:
+      - "src/**"
+      - ".github/workflows/**"
+
 permissions:
   contents: read
   packages: write
+
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      lazy-loader: ${{ steps.filter.outputs.lazy-loader }}
+      code-executor: ${{ steps.filter.outputs.code-executor }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            lazy-loader:
+              - 'src/services/lazy-loader/**'
+            code-executor:
+              - 'src/services/code-executor/**'
+
   build-lazy-loader:
+    needs: check-changes
+    if: needs.check-changes.outputs.lazy-loader == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +55,10 @@ jobs:
             ghcr.io/pnettto/lazy-loader:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
   build-code-executor:
+    needs: check-changes
+    if: needs.check-changes.outputs.code-executor == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -61,6 +88,7 @@ jobs:
             ghcr.io/pnettto/code-executor:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
   deploy:
     needs: [build-lazy-loader, build-code-executor]
     runs-on: ubuntu-latest
@@ -99,7 +127,7 @@ jobs:
 
             echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
             docker compose pull && \
-            docker compose build && \
+            docker compose build --all-resources && \
             docker compose up -d --remove-orphans && \
             docker image prune -f
 
