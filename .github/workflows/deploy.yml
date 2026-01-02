@@ -94,8 +94,12 @@ jobs:
 
             # Build in temp directory
             cd "$TEMP_DIR/src"
-            ./build.sh
-            GH_PAT="${{ secrets.GH_PAT }}" GH_ACTOR="${{ github.actor }}" ./run_deploy.sh
+
+            echo ${{ secrets.GH_PAT }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin && \
+            docker compose pull && \
+            docker compose build \
+            docker compose up -d --remove-orphans \ 
+            docker image prune -f
 
             # Atomic swap
             sudo rm -rf "${DEPLOY_DIR}.old"
