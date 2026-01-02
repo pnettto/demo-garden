@@ -91,6 +91,8 @@ jobs:
 
             # Copy .env files from current deployment
             find "$DEPLOY_DIR" -name ".env*" -exec bash -c 'cp "$1" "$2${1#$3}"' _ {} "$TEMP_DIR" "$DEPLOY_DIR" \; 2>/dev/null || true
+            # Copy certs from current deployment
+            cp -a $DEPLOY_DIR/src/services/nginx/certs $TEMP_DIR/src/services/nginx/
 
             # Build in temp directory
             cd "$TEMP_DIR/src"
