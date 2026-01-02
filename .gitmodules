@@ -4,6 +4,6 @@
 [submodule "src/services/code-executor/submodule"]
 	path = src/services/code-executor/submodule
 	url = https://github.com/pnettto/code-executor.git
-[submodule "src/services/spotify-client"]
-	path = src/services/spotify-client
+[submodule "src/services/spotify-client/submodule"]
+	path = src/services/spotify-client/submodule
 	url = https://github.com/pnettto/spotify-client
