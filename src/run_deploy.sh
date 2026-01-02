@@ -7,8 +7,6 @@ docker rm demo-garden 2>/dev/null || true
 
 echo "Starting Base VM container..."
 
-docker rm -f demo-garden || true
-
 docker run --privileged -d \
   --cgroupns host \
   -v "$(pwd):/workspace" \
