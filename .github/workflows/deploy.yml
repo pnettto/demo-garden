@@ -1,13 +1,10 @@
 name: Deploy to VM
-
 on:
   push:
     branches: [main]
-
 permissions:
   contents: read
   packages: write
-
 jobs:
   build-lazy-loader:
     runs-on: ubuntu-latest
@@ -34,7 +31,6 @@ jobs:
             ghcr.io/pnettto/lazy-loader:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
   build-code-executor:
     runs-on: ubuntu-latest
     steps:
@@ -65,7 +61,6 @@ jobs:
             ghcr.io/pnettto/code-executor:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
   deploy:
     needs: [build-lazy-loader, build-code-executor]
     runs-on: ubuntu-latest
@@ -78,15 +73,32 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           passphrase: ${{ secrets.VM_PASSPHRASE }}
           script: |
-            mkdir -p /home/${{ secrets.VM_USER }}/demo-garden
-            cd /home/${{ secrets.VM_USER }}/demo-garden
+            set -e
+            DEPLOY_DIR="/home/${{ secrets.VM_USER }}/demo-garden"
+            TEMP_DIR="/home/${{ secrets.VM_USER }}/demo-garden.new"
 
+            # Clean temp directory if it exists
+            sudo rm -rf "$TEMP_DIR"
+            mkdir -p "$TEMP_DIR"
+            cd "$TEMP_DIR"
+
+            # Clone and setup in temp directory
             git init
-            git remote add origin https://${{ secrets.GH_PAT }}@github.com/${{ github.actor }}/demo-garden.git || true
+            git remote add origin https://${{ secrets.GH_PAT }}@github.com/${{ github.actor }}/demo-garden.git
             git fetch origin main
             git reset --hard FETCH_HEAD
             git submodule update --init --recursive
 
-            cd src
+            # Copy .env files from current deployment
+            find "$DEPLOY_DIR" -name ".env*" -exec bash -c 'cp "$1" "$2${1#$3}"' _ {} "$TEMP_DIR" "$DEPLOY_DIR" \; 2>/dev/null || true
+
+            # Build in temp directory
+            cd "$TEMP_DIR/src"
             ./build.sh
             GH_PAT="${{ secrets.GH_PAT }}" GH_ACTOR="${{ github.actor }}" ./run_deploy.sh
+
+            # Atomic swap
+            sudo rm -rf "${DEPLOY_DIR}.old"
+            sudo mv "$DEPLOY_DIR" "${DEPLOY_DIR}.old" 2>/dev/null || true
+            sudo mv "$TEMP_DIR" "$DEPLOY_DIR"
+            sudo rm -rf "${DEPLOY_DIR}.old"
