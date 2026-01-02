@@ -6,6 +6,7 @@ on:
     paths:
       - "src/**"
       - ".github/workflows/**"
+      - "docker-compose.yml"
 
 permissions:
   contents: read
