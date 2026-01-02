@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Client - Demo Garden</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../base.css">
+</head>
+<body class="app-layout">
+    <nav class="nav">
+        <a href="/" class="nav-link">← Garden</a>
+        <h1>Spotify Client</h1>
+        <div style="width: 40px;"></div>
+    </nav>
+
+    <main class="main-content">
+        <aside class="app-sidebar">
+            <span class="label">Architecture</span>
+            <p style="font-size: 13px; color: var(--text-dim);">
+                Deno app that manages an incremental update of my collection and exposes an interface so I can explore and play my favourite album, in a way that makes sense for me.
+            </p>
+
+            <a href="/spotify-client/" class="btn" style="text-decoration: none;">Open Directly</a>
+
+            <div style="margin-top: auto;">
+                <span class="label">Tech Stack</span>
+                <p style="font-size: 12px; color: var(--text-dim);">
+                    Deno<br>HTML+JS<br>
+                </p>
+            </div>
+        </aside>
+
+        <section class="app-view" style="padding: 0;">
+            <iframe src="/spotify-client/" style="width: 100%; height: 100%; border: none;"></iframe>
+        </section>
+    </main>
+</body>
+</html>
