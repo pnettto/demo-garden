@@ -1,6 +1,6 @@
 services:
   code-executor:
-    runtime: runsc
+    # runtime: runsc
     image: ghcr.io/pnettto/code-executor:latest
     build:
       context: ./submodule/
@@ -16,6 +16,7 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    privileged: true
     expose:
       - "8000"
     restart: on-failure

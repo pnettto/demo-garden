@@ -1,0 +1,14 @@
+services:
+  spotify-client:
+    build: ./submodule/
+    env_file:
+      - .env
+    # profiles:
+    #   - lazy
+    # labels:
+    #   - garbage_collect
+    volumes:
+      - ./.cache:/app/.cache
+    expose:
+      - 8000
+    restart: on-failure
