@@ -2,7 +2,7 @@ import { apiFetch, initNav, renderTracks, updateNowPlaying } from "./shared.js";
 
 async function fetchPlaylistTracks() {
   const playlistId = new URLSearchParams(globalThis.location.search).get("id");
-  if (!playlistId) return (globalThis.location.href = "/playlists");
+  if (!playlistId) return (globalThis.location.href = "playlists");
 
   const container = document.getElementById("playlist-tracks");
   const nameEl = document.getElementById("current-playlist-name");
@@ -31,5 +31,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 document.getElementById("back-to-playlists").onclick = () => {
-  globalThis.location.href = "/playlists";
+  globalThis.location.href = "playlists";
 };
