@@ -7,7 +7,6 @@ let searchTimeout;
 async function fetchAlbums() {
   try {
     const data = await apiFetch("/api/albums");
-    console.log(`data`, data);
     allAlbums = data.albums || [];
 
     if (allAlbums.length > 0) {
@@ -56,14 +55,7 @@ function renderFilteredAlbums() {
   const genre = document.getElementById("genre-filter").value;
   const sort = document.getElementById("sort-select").value;
 
-  const pathParts = globalThis.location.pathname.split("/");
-  const targetId = pathParts[2];
-
   const filtered = allAlbums.filter((album) => {
-    // Deep link override
-    if (targetId) {
-      return album.id === targetId || album.uri === targetId;
-    }
     let searchPattern = query.toLowerCase().replace(/'/gi, "");
     searchPattern = searchPattern
       .replace(/a/gi, "[aàáâãäåæāăąǎǟǡǻȁȃȧ]")

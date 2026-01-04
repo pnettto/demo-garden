@@ -1,8 +1,7 @@
 import { apiFetch, initNav, renderTracks, updateNowPlaying } from "./shared.js";
 
 async function fetchPlaylistTracks() {
-  const pathParts = globalThis.location.pathname.split("/");
-  const playlistId = pathParts[2];
+  const playlistId = new URLSearchParams(globalThis.location.search).get("id");
   if (!playlistId) return (globalThis.location.href = "/playlists");
 
   const container = document.getElementById("playlist-tracks");

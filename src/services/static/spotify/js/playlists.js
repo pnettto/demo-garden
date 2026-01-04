@@ -19,7 +19,7 @@ function renderPlaylists(items) {
     clone.querySelector("img").src = playlist.images?.[0]?.url || "";
     clone.querySelector(".playlist-name").textContent = playlist.name;
     clone.querySelector(".playlist-card").onclick = () => {
-      globalThis.location.href = `/playlist/${playlist.id}`;
+      globalThis.location.href = `/playlist/?id=${playlist.id}`;
     };
     grid.appendChild(clone);
   });
