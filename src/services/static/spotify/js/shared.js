@@ -87,8 +87,7 @@ export async function updateNowPlaying() {
   const banner = document.getElementById("now-playing");
   if (!banner) return;
   try {
-    const data = await apiFetch("/api/history");
-
+    const data = await apiFetch("/api/now-playing");
     if (data.playing) {
       document.getElementById("now-playing-cover").src = data.cover;
       document.getElementById("now-playing-name").textContent = data.name;

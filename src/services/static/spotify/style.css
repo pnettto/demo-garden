@@ -78,11 +78,12 @@ header {
 .status-banner {
   padding: 0.625rem 0.875rem;
   min-width: 15rem;
+  max-width: 20rem;
   cursor: pointer;
 }
 
 /* Navigation */
-.main-nav {
+.app-main-nav {
   display: flex;
   gap: var(--sp-xl);
   margin-top: var(--sp-lg);
@@ -92,7 +93,13 @@ header {
   color: var(--text-muted);
   text-decoration: none;
   font-weight: 700;
-  font-size: var(--fs-md);
+  font-size: var(--fs-sm);
+}
+
+@media (min-width: 800px) {
+  .nav-link {
+    font-size: var(--fs-md);
+  }
 }
 
 .nav-link:hover,
