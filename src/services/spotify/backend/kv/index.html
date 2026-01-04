@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deno KV Explorer</title>
+    <link rel="stylesheet" href="/kv/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    >
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>KV Explorer</h1>
+        <button id="add-btn" class="primary-btn">New Entry</button>
+      </header>
+
+      <main>
+        <div id="entry-list" class="entry-list">
+          <!-- Entries will be loaded here -->
+        </div>
+      </main>
+    </div>
+
+    <!-- Modal for Adding/Editing -->
+    <div id="modal" class="modal hidden">
+      <div class="modal-content">
+        <h2 id="modal-title">New Entry</h2>
+        <div class="form-group">
+          <label for="entry-key">Key (JSON Array, e.g. ["users", 1])</label>
+          <input type="text" id="entry-key" placeholder='["key"]'>
+        </div>
+        <div class="form-group">
+          <label for="entry-value">Value (JSON)</label>
+          <textarea id="entry-value" placeholder='{"name": "John"}'></textarea>
+        </div>
+        <div class="modal-actions">
+          <button id="cancel-btn" class="secondary-btn">Cancel</button>
+          <button id="save-btn" class="primary-btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/kv/app.js"></script>
+  </body>
+</html>
