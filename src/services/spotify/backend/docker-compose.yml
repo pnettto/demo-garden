@@ -1,0 +1,10 @@
+services:
+  spotify-client:
+    build: ./
+    env_file:
+      - .env
+    volumes:
+      - ./db:/app/db
+    ports:
+      - "8000:8000"
+    restart: on-failure
