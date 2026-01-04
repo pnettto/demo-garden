@@ -3,12 +3,12 @@ services:
     build: ./submodule/
     env_file:
       - .env
-    profiles:
-      - lazy
-    labels:
-      - garbage_collect
+    # profiles:
+    #   - lazy
+    # labels:
+    #   - garbage_collect
     volumes:
-      - /app/.cache
+      - /app/db
     expose:
       - 8000
     restart: on-failure
