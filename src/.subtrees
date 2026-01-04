@@ -1,2 +1,3 @@
 # Format: prefix|repository|branch
 services/static/spotify|frontend|https://github.com/pnettto/spotify-client|main
+services/spotify/backend|backend|https://github.com/pnettto/spotify-client|main

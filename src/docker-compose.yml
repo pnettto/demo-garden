@@ -5,4 +5,4 @@ include:
   - ./services/lazy-loader/docker-compose.yml
   - ./services/nginx/docker-compose.yml
   - ./services/parallelism/docker-compose.yml
-  - ./services/spotify-client/docker-compose.yml
+  - ./services/spotify-api/docker-compose.yml

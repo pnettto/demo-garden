@@ -133,6 +133,7 @@ update_subtree() {
 }
 
 # Helper function to update a single subtree
+# Helper function to update a single subtree
 update_single_subtree() {
     local local_path="$1"
     local source_folder="$2"
@@ -153,7 +154,11 @@ update_single_subtree() {
                 [ -e "$item" ] && cp -r "$item" .
             done
             shopt -u dotglob
-            git add .
+            # Only add files that were copied from temp_dir
+            for item in "$temp_dir"/*; do
+                basename_item=$(basename "$item")
+                [ -e "$basename_item" ] && git add "$basename_item"
+            done
             git commit -m "Update subtree from $repo"
             git rm -r "$temp_dir"
             git commit --amend -m "Update subtree from $repo"
@@ -170,20 +175,27 @@ update_single_subtree() {
             return
         fi
         
-        # Remove old content
+        # Remove old content and copy new
         if [ "$local_path" = "." ]; then
-            # For root, be careful not to delete everything
-            find . -maxdepth 1 -not -name '.git' -not -name '.' -not -name '..' -not -name "$SUBTREES_FILE" -exec rm -rf {} +
-            cp -r "$temp_dir/$source_folder"/* .
+            # For root, be careful - only update files that came from the subtree
+            # This is tricky, so we'll use a more conservative approach
+            shopt -s dotglob
+            for item in "$temp_dir/$source_folder"/*; do
+                basename_item=$(basename "$item")
+                [ -e "$basename_item" ] && rm -rf "$basename_item"
+                cp -r "$item" .
+                git add "$basename_item"
+            done
+            shopt -u dotglob
         else
             rm -rf "$local_path"
             mkdir -p "$local_path"
             cp -r "$temp_dir/$source_folder"/* "$local_path/"
+            git add "$local_path"
         fi
         
         rm -rf "$temp_dir"
         
-        git add .
         if [ "$local_path" = "." ]; then
             git commit -m "Update subtree from $repo/$source_folder"
         else
@@ -305,7 +317,7 @@ show_menu() {
     echo ""
     echo "=== Git Subtree Manager ==="
     echo "1. Add subtree"
-    echo "2. Update subtree"
+    echo "2. Pull latest subtree"
     echo "3. Push changes to subtree"
     echo "4. Remove subtree"
     echo "5. List subtrees"
