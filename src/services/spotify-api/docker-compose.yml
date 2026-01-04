@@ -1,12 +1,12 @@
 services:
   spotify-client:
-    build: ./submodule/
+    build: ./backend/
     env_file:
       - .env
-    # profiles:
-    #   - lazy
-    # labels:
-    #   - garbage_collect
+    profiles:
+      - lazy
+    labels:
+      - garbage_collect
     volumes:
       - /app/db
     expose:
