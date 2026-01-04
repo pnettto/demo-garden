@@ -75,17 +75,17 @@ function renderFilteredHistory() {
 
 // Init
 document.addEventListener("DOMContentLoaded", () => {
+  // Listeners
+  document.getElementById("load-more-history").onclick = fetchHistory;
+  const searchEl = document.getElementById("history-search");
+  searchEl.onchange = renderFilteredHistory;
+  searchEl.oninput = () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(renderFilteredHistory, 500);
+  };
+
   initNav();
   fetchHistory();
   updateNowPlaying();
   setInterval(updateNowPlaying, 30000); // 30s
 });
-
-// Listeners
-document.getElementById("load-more-history").onclick = fetchHistory;
-const searchEl = document.getElementById("history-search");
-searchEl.onchange = renderFilteredHistory;
-searchEl.oninput = () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(renderFilteredHistory, 500);
-};

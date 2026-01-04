@@ -121,35 +121,38 @@ function populateGenreFilter(albums) {
 
 // Init
 document.addEventListener("DOMContentLoaded", () => {
+  const searchTerm = new URLSearchParams(globalThis.location.search).get(
+    "search",
+  );
+  if (searchTerm) {
+    document.getElementById("search-input").value = searchTerm;
+  }
+
+  // Listeners
+  document.getElementById("sync-vault-btn").onclick = syncVault;
+  ["search-input", "decade-filter", "genre-filter", "sort-select"].forEach(
+    (id) => {
+      const el = document.getElementById(id);
+      el.onchange = renderFilteredAlbums;
+      if (id === "search-input") {
+        el.oninput = () => {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(renderFilteredAlbums, 300);
+        };
+      }
+    },
+  );
+
+  globalThis.addEventListener("beforeunload", (e) => {
+    if (isSyncing) {
+      e.preventDefault();
+      return (e.returnValue = "");
+    }
+  });
+
   initNav();
   fetchAlbums();
   setTimeout(syncVault, 500);
   updateNowPlaying();
   setInterval(updateNowPlaying, 30000); // 30s
-});
-
-// Listeners
-document.getElementById("sync-vault-btn").onclick = syncVault;
-["search-input", "decade-filter", "genre-filter", "sort-select"].forEach(
-  (id) => {
-    const el = document.getElementById(id);
-    el.onchange = renderFilteredAlbums;
-    if (id === "search-input") {
-      el.oninput = () => {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(renderFilteredAlbums, 300);
-      };
-    }
-  },
-);
-globalThis.onpopstate = () => {
-  renderFilteredAlbums();
-  initNav();
-};
-
-globalThis.addEventListener("beforeunload", (e) => {
-  if (isSyncing) {
-    e.preventDefault();
-    return (e.returnValue = "");
-  }
 });

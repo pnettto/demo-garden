@@ -117,12 +117,3 @@ export function initNav() {
     }
   });
 }
-
-export function navigateTo(path) {
-  globalThis.history.pushState(null, "", path);
-  initNav();
-}
-
-globalThis.addEventListener("popstate", () => {
-  initNav();
-});
