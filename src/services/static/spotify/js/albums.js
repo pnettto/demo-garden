@@ -128,11 +128,13 @@ function populateGenreFilter(albums) {
 }
 
 // Init
-initNav();
-fetchAlbums();
-setTimeout(syncVault, 500);
-updateNowPlaying();
-setInterval(updateNowPlaying, 30000); // 30s
+document.addEventListener("DOMContentLoaded", () => {
+  initNav();
+  fetchAlbums();
+  setTimeout(syncVault, 500);
+  updateNowPlaying();
+  setInterval(updateNowPlaying, 30000); // 30s
+});
 
 // Listeners
 document.getElementById("sync-vault-btn").onclick = syncVault;

@@ -74,10 +74,12 @@ function renderFilteredHistory() {
 }
 
 // Init
-initNav();
-fetchHistory();
-updateNowPlaying();
-setInterval(updateNowPlaying, 30000); // 30s
+document.addEventListener("DOMContentLoaded", () => {
+  initNav();
+  fetchHistory();
+  updateNowPlaying();
+  setInterval(updateNowPlaying, 30000); // 30s
+});
 
 // Listeners
 document.getElementById("load-more-history").onclick = fetchHistory;

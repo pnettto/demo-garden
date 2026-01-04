@@ -24,10 +24,12 @@ async function fetchPlaylistTracks() {
 }
 
 // Init
-initNav();
-fetchPlaylistTracks();
-updateNowPlaying();
-setInterval(updateNowPlaying, 30000); // 30s
+document.addEventListener("DOMContentLoaded", () => {
+  initNav();
+  fetchPlaylistTracks();
+  updateNowPlaying();
+  setInterval(updateNowPlaying, 30000); // 30s
+});
 
 document.getElementById("back-to-playlists").onclick = () => {
   globalThis.location.href = "/playlists";

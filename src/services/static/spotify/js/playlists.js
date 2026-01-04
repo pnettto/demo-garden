@@ -26,7 +26,9 @@ function renderPlaylists(items) {
 }
 
 // Init
-initNav();
-fetchPlaylists();
-updateNowPlaying();
-setInterval(updateNowPlaying, 30000); // 30s
+document.addEventListener("DOMContentLoaded", () => {
+  initNav();
+  fetchPlaylists();
+  updateNowPlaying();
+  setInterval(updateNowPlaying, 30000); // 30s
+});
