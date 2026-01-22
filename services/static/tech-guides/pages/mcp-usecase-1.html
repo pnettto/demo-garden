@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tool Integration - Model Context Protocol</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <a href="mcp.html">Model Context Protocol</a> / <span>Tool Integration</span>
+  </div>
+
+  <main>
+    <a href="mcp.html" class="back-link">← Back to MCP</a>
+
+    <section class="use-case-detail">
+      <h2>Tool Integration with MCP</h2>
+      <p>Connecting AI models with external tools and APIs through MCP, enabling models to invoke functions, query services, and perform actions beyond text generation.</p>
+
+      <h3>Overview</h3>
+      <p>MCP's tool integration allows models to call functions with defined schemas. Tools are self-describing with parameters, types, and descriptions that help models understand and use them appropriately.</p>
+
+      <h3>Basic MCP Server with Tools</h3>
+      <div class="code-label">Python - Simple MCP Server</div>
+      <pre><code class="language-python">from mcp.server import Server, Tool
+from mcp.types import TextContent
+import json
+
+# Create MCP server
+server = Server("calculator-service")
+
+# Define a tool
+@server.tool()
+def add(a: float, b: float) -> str:
+    """Add two numbers together"""
+    result = a + b
+    return TextContent(text=f"{a} + {b} = {result}")
+
+@server.tool()
+def multiply(a: float, b: float) -> str:
+    """Multiply two numbers"""
+    result = a * b
+    return TextContent(text=f"{a} * {b} = {result}")
+
+@server.tool()
+def divide(a: float, b: float) -> str:
+    """Divide two numbers"""
+    if b == 0:
+        return TextContent(text="Error: Division by zero")
+    result = a / b
+    return TextContent(text=f"{a} / {b} = {result}")
+
+# Tool schema is automatically generated from function signatures
+# Clients can discover available tools via list_tools()
+
+if __name__ == "__main__":
+    # Run server on stdio transport
+    import sys
+    server.run(sys.stdin.buffer, sys.stdout.buffer)</code></pre>
+
+      <h3>Advanced Tool Definitions</h3>
+      <div class="code-label">Python - Complex Tool with Validation</div>
+      <pre><code class="language-python">from mcp.server import Server
+from mcp.types import TextContent, ToolDefinition
+from pydantic import BaseModel, Field
+import requests
+
+server = Server("weather-service")
+
+class WeatherQuery(BaseModel):
+    city: str = Field(..., description="City name")
+    units: str = Field(default="metric", description="Unit system: metric or imperial")
+    include_forecast: bool = Field(default=False, description="Include 5-day forecast")
+
+@server.tool(
+    name="get_weather",
+    description="Get current weather and optional forecast for a city"
+)
+def get_weather(query: WeatherQuery) -> str:
+    """Fetch weather data from OpenWeatherMap API"""
+    try:
+        # Validate city name
+        if not query.city or len(query.city) > 100:
+            return TextContent(text="Invalid city name")
+        
+        # Query weather API
+        api_url = "https://api.openweathermap.org/data/2.5/weather"
+        params = {
+            "q": query.city,
+            "units": query.units,
+            "appid": "YOUR_API_KEY"
+        }
+        
+        response = requests.get(api_url, params=params)
+        
+        if response.status_code == 200:
+            data = response.json()
+            temp = data['main']['temp']
+            description = data['weather'][0]['description']
+            
+            result = f"Weather in {query.city}: {temp}° - {description}"
+            
+            if query.include_forecast:
+                # Fetch forecast
+                forecast_url = "https://api.openweathermap.org/data/2.5/forecast"
+                forecast_response = requests.get(forecast_url, params=params)
+                if forecast_response.status_code == 200:
+                    forecast_data = forecast_response.json()
+                    result += f"\nForecast: {len(forecast_data['list'])} data points available"
+            
+            return TextContent(text=result)
+        else:
+            return TextContent(text=f"Error: {response.status_code}")
+    
+    except Exception as e:
+        return TextContent(text=f"Error fetching weather: {str(e)}")</code></pre>
+
+      <h3>MCP Client Using Tools</h3>
+      <div class="code-label">Python - Client Invoking Tools</div>
+      <pre><code class="language-python">from mcp.client import Client
+from typing import Any
+import asyncio
+
+async def use_tools():
+    # Connect to MCP server
+    client = Client("weather-service", transport="stdio")
+    
+    # Discover available tools
+    tools = await client.list_tools()
+    
+    print("Available tools:")
+    for tool in tools:
+        print(f"  - {tool.name}: {tool.description}")
+        print(f"    Parameters: {tool.inputSchema}")
+    
+    # Call a tool
+    result = await client.call_tool(
+        name="get_weather",
+        arguments={
+            "city": "San Francisco",
+            "units": "metric",
+            "include_forecast": True
+        }
+    )
+    
+    print(f"Result: {result.content[0].text}")
+
+# Run async client
+asyncio.run(use_tools())</code></pre>
+
+      <h3>Tool Integration with LangChain</h3>
+      <div class="code-label">Python - LangChain + MCP Tools</div>
+      <pre><code class="language-python">from langchain.agents import AgentExecutor, create_react_agent
+from langchain_core.tools import tool
+from mcp.client import MCPClient
+import asyncio
+
+class MCPToolAdapter:
+    """Adapter to use MCP tools as LangChain tools"""
+    
+    def __init__(self, mcp_client: MCPClient):
+        self.mcp_client = mcp_client
+        self.tools = []
+    
+    async def load_tools(self):
+        """Load all tools from MCP server"""
+        mcp_tools = await self.mcp_client.list_tools()
+        
+        for mcp_tool in mcp_tools:
+            # Create LangChain tool wrapper
+            @tool(name=mcp_tool.name, description=mcp_tool.description)
+            async def invoke_mcp_tool(**kwargs):
+                result = await self.mcp_client.call_tool(
+                    name=mcp_tool.name,
+                    arguments=kwargs
+                )
+                return result.content[0].text
+            
+            self.tools.append(invoke_mcp_tool)
+        
+        return self.tools
+
+# Usage
+async def main():
+    mcp_client = MCPClient("weather-service")
+    adapter = MCPToolAdapter(mcp_client)
+    langchain_tools = await adapter.load_tools()
+    
+    # Use with LangChain agent
+    from langchain_openai import ChatOpenAI
+    agent = create_react_agent(
+        ChatOpenAI(),
+        langchain_tools
+    )
+    
+    executor = AgentExecutor.from_agent_and_tools(agent, langchain_tools)
+    
+    # Agent can now use MCP tools
+    result = executor.invoke({
+        "input": "What's the weather in London?"
+    })
+
+asyncio.run(main())</code></pre>
+
+      <h3>Error Handling and Timeouts</h3>
+      <div class="code-label">Python - Robust Tool Implementation</div>
+      <pre><code class="language-python">from mcp.server import Server
+from mcp.types import TextContent
+import asyncio
+import functools
+
+server = Server("robust-service")
+
+def with_timeout(seconds: int):
+    """Decorator to add timeout to tool calls"""
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            try:
+                result = await asyncio.wait_for(func(*args, **kwargs), timeout=seconds)
+                return result
+            except asyncio.TimeoutError:
+                return TextContent(text=f"Tool execution timed out after {seconds}s")
+        return wrapper
+    return decorator
+
+@server.tool(name="slow_operation")
+@with_timeout(30)
+async def slow_operation(query: str) -> str:
+    """Long-running operation with timeout"""
+    try:
+        # Simulate long operation
+        await asyncio.sleep(2)
+        return TextContent(text=f"Processed: {query}")
+    except Exception as e:
+        return TextContent(text=f"Error: {str(e)}")
+
+@server.tool(name="database_query")
+async def database_query(table: str, limit: int = 10) -> str:
+    """Query database with error handling"""
+    try:
+        # Validate inputs
+        if limit < 1 or limit > 1000:
+            return TextContent(text="Limit must be between 1 and 1000")
+        
+        if not table.isidentifier():
+            return TextContent(text="Invalid table name")
+        
+        # Execute query
+        # result = db.query(f"SELECT * FROM {table} LIMIT {limit}")
+        # return TextContent(text=json.dumps(result))
+        
+        return TextContent(text=f"Query would return {limit} rows from {table}")
+    
+    except Exception as e:
+        return TextContent(text=f"Database error: {str(e)}")</code></pre>
+
+      <h3>Tool Composition</h3>
+      <div class="code-label">Python - Composing Multiple Tools</div>
+      <pre><code class="language-python">from mcp.server import Server
+from mcp.types import TextContent
+import json
+
+server = Server("data-service")
+
+# Individual tools
+@server.tool()
+def fetch_user(user_id: int) -> str:
+    """Fetch user data by ID"""
+    users = {
+        1: {"name": "Alice", "email": "alice@example.com"},
+        2: {"name": "Bob", "email": "bob@example.com"}
+    }
+    if user_id in users:
+        return TextContent(text=json.dumps(users[user_id]))
+    return TextContent(text="User not found")
+
+@server.tool()
+def fetch_orders(user_id: int) -> str:
+    """Fetch orders for user"""
+    orders = {
+        1: [{"id": 101, "total": 50}, {"id": 102, "total": 75}],
+        2: [{"id": 201, "total": 100}]
+    }
+    if user_id in orders:
+        return TextContent(text=json.dumps(orders[user_id]))
+    return TextContent(text="No orders found")
+
+@server.tool()
+def calculate_total_spent(user_id: int) -> str:
+    """Calculate total amount spent by user"""
+    # This tool uses other tools' results
+    orders_text = fetch_orders(user_id).text
+    try:
+        orders = json.loads(orders_text)
+        total = sum(order["total"] for order in orders)
+        return TextContent(text=f"User {user_id} spent ${total} total")
+    except:
+        return TextContent(text="Could not calculate total")</code></pre>
+
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Define clear tool names and descriptions for discoverability</li>
+        <li>Use type hints for proper schema generation</li>
+        <li>Implement comprehensive error handling and validation</li>
+        <li>Set reasonable timeouts for long-running operations</li>
+        <li>Document parameters and return values clearly</li>
+        <li>Test tools independently before exposing via MCP</li>
+        <li>Implement proper authentication for sensitive operations</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

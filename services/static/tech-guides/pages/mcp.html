@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Context Protocol - Technology Overview</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <span>Model Context Protocol</span>
+  </div>
+
+  <main>
+    <section class="overview-header">
+      <h1>Model Context Protocol (MCP)</h1>
+      <p>Open standard protocol that enables AI models to securely access external tools, data sources, and services through a unified interface.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>What is Model Context Protocol?</h2>
+      <p>MCP is a standardized interface developed to allow language models and AI systems to connect with external resources. It defines how models can request data, invoke tools, and interact with services in a safe, scalable way. MCP enables interoperability between different AI frameworks and external systems.</p>
+      <h3>Core Concepts</h3>
+      <ul>
+        <li><strong>Transport Layer:</strong> JSON-RPC protocol for client-server communication</li>
+        <li><strong>Resources:</strong> Expose data and files to the model context</li>
+        <li><strong>Tools:</strong> Define callable functions with schemas and descriptions</li>
+        <li><strong>Prompts:</strong> Reusable prompt templates with arguments</li>
+        <li><strong>Sampling:</strong> Model sampling and completion capabilities</li>
+        <li><strong>Security:</strong> Built-in authentication and authorization controls</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Typical Use Cases</h2>
+      <ul class="use-cases-list">
+        <li class="use-case-item">
+          <a href="mcp-usecase-1.html" style="text-decoration: none; color: inherit;">
+            <strong>Tool Integration</strong>
+            <p>Connect AI models with external tools, APIs, and services seamlessly.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="mcp-usecase-2.html" style="text-decoration: none; color: inherit;">
+            <strong>Data Source Integration</strong>
+            <p>Expose databases, files, and knowledge bases to AI models securely.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="mcp-usecase-3.html" style="text-decoration: none; color: inherit;">
+            <strong>Custom AI Backends</strong>
+            <p>Build specialized services that models can query and interact with.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="mcp-usecase-4.html" style="text-decoration: none; color: inherit;">
+            <strong>Multi-Model Orchestration</strong>
+            <p>Coordinate multiple AI models accessing shared resources and tools.</p>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Mental Model</h2>
+      <p>Think of MCP as a universal adapter for AI models. It's a standardized way for models to say "I need data" or "I want to call this function" and have any system understand. Once your tool speaks MCP, any model can use it—eliminating custom integration work.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Architecture Overview</h2>
+      <pre><code>
+[AI Model / Client]
+         |
+      MCP Protocol (JSON-RPC)
+         |
+    [MCP Server]
+    ├─ Resources (Data/Files)
+    ├─ Tools (Callable Functions)
+    ├─ Prompts (Templates)
+    └─ Sampling (Model Capabilities)
+         |
+[External Services / Databases]
+      </code></pre>
+      <p>MCP defines a standardized bidirectional protocol. Models request resources or invoke tools through MCP servers, which abstract the complexity of connecting to diverse backend systems. Security and schema validation are built-in.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Key Concepts Glossary</h2>
+      <ul>
+        <li><strong>MCP Server:</strong> Service implementing MCP protocol to expose resources and tools</li>
+        <li><strong>Resource:</strong> Data or file exposed by server for model to read</li>
+        <li><strong>Tool:</strong> Callable function with schema and description for model to invoke</li>
+        <li><strong>Prompt:</strong> Reusable prompt template with parameters defined by server</li>
+        <li><strong>Transport:</strong> Communication layer (JSON-RPC over stdio or HTTP)</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>When to Use MCP</h2>
+      <p><strong>Choose MCP if you need:</strong></p>
+      <ul>
+        <li>Standardized integration between AI models and external systems</li>
+        <li>Tool and data exposure that works across multiple AI frameworks</li>
+        <li>Security and governance for model access to resources</li>
+      </ul>
+      <p><strong>Consider alternatives if:</strong></p>
+      <ul>
+        <li>You only need integration with a single framework</li>
+        <li>Your integration requirements are framework-specific</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Getting Started</h2>
+      <p>Install MCP SDK and create your first server:</p>
+      <pre><code class="language-bash">pip install mcp
+mcp create-server my-server</code></pre>
+      <p><a href="https://modelcontextprotocol.io" target="_blank">→ MCP Documentation</a></p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Resources for Further Learning</h2>
+      <ul>
+        <li><a href="https://modelcontextprotocol.io/docs" target="_blank">Official Documentation</a> - Specification and implementation guide</li>
+        <li><a href="https://github.com/modelcontextprotocol" target="_blank">GitHub Organization</a> - Reference implementations and examples</li>
+        <li><a href="https://spec.modelcontextprotocol.io/" target="_blank">Protocol Specification</a> - Technical details and schema</li>
+        <li><a href="https://modelcontextprotocol.io/servers" target="_blank">Server Directory</a> - Pre-built servers and integrations</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>
