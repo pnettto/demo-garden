@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Research & Analysis - CrewAI</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <a href="crewai.html">CrewAI</a> / <span>Research & Analysis</span>
+  </div>
+
+  <main>
+    <a href="crewai.html" class="back-link">← Back to CrewAI</a>
+
+    <section class="use-case-detail">
+      <h2>Research & Analysis with CrewAI</h2>
+      <p>Building intelligent research pipelines where specialized agents gather, analyze, and synthesize information from diverse sources to produce comprehensive reports.</p>
+
+      <h3>Overview</h3>
+      <p>Multi-agent research systems leverage different agent specializations: researchers gather data, analysts evaluate quality, and writers synthesize findings. This separation of concerns ensures thorough, accurate research outputs.</p>
+
+      <h3>Agent Specializations</h3>
+      <ul>
+        <li><strong>Research Agent:</strong> Searches and collects information from APIs, databases, web sources</li>
+        <li><strong>Analysis Agent:</strong> Evaluates data quality, identifies patterns, and validates findings</li>
+        <li><strong>Synthesis Agent:</strong> Combines findings into cohesive narratives and actionable insights</li>
+        <li><strong>Review Agent:</strong> Quality checks and ensures completeness before delivery</li>
+      </ul>
+
+      <h3>Basic Research Crew Setup</h3>
+      <div class="code-label">Python - CrewAI Research Pipeline</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew, LLM
+from crewai_tools import SerperDevTool, FileReadTool
+
+# Initialize tools
+search_tool = SerperDevTool()
+file_tool = FileReadTool()
+
+# Define Agents
+researcher = Agent(
+    role="Research Analyst",
+    goal="Find factual, current information on the given topic",
+    backstory="Expert researcher with 10 years of experience in data gathering",
+    tools=[search_tool],
+    llm="gpt-4"
+)
+
+analyst = Agent(
+    role="Data Analyst",
+    goal="Evaluate research findings and identify patterns",
+    backstory="Skilled data analyst who ensures quality and relevance",
+    tools=[],
+    llm="gpt-4"
+)
+
+writer = Agent(
+    role="Technical Writer",
+    goal="Create clear, comprehensive reports from analyzed data",
+    backstory="Professional writer specializing in technical topics",
+    tools=[],
+    llm="gpt-4"
+)
+
+# Define Tasks
+research_task = Task(
+    description="Research the latest developments in {topic}",
+    agent=researcher,
+    expected_output="Detailed list of findings with sources"
+)
+
+analysis_task = Task(
+    description="Analyze the research findings and extract key insights",
+    agent=analyst,
+    expected_output="Summary of patterns and key findings"
+)
+
+writing_task = Task(
+    description="Write a comprehensive report based on analysis",
+    agent=writer,
+    expected_output="Well-structured technical report"
+)
+
+# Create and execute crew
+crew = Crew(
+    agents=[researcher, analyst, writer],
+    tasks=[research_task, analysis_task, writing_task],
+    verbose=True,
+    process="sequential"
+)
+
+result = crew.kickoff(inputs={"topic": "Autonomous AI Agents 2025"})</code></pre>
+
+      <h3>Advanced Crew with Memory</h3>
+      <div class="code-label">Python - Crew with Long-Term Memory</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew, Memory
+from crewai_tools import SerperDevTool, DatabaseTool
+
+# Initialize with memory
+memory = Memory(
+    memory_type="long_term",
+    max_memory_items=100,
+    embedding_model="openai",
+)
+
+# Agents with context awareness
+researcher = Agent(
+    role="Research Analyst",
+    goal="Find and track research across multiple sessions",
+    backstory="Expert with institutional knowledge",
+    tools=[SerperDevTool()],
+    memory=memory,
+    allow_delegation=True,
+    max_retries=3,
+    llm="gpt-4"
+)
+
+# Task with context from memory
+research_task = Task(
+    description="""Research {topic}. 
+    Remember previous findings on related topics from memory.
+    Focus on new developments since last research.""",
+    agent=researcher,
+    expected_output="Updated findings with novelty assessment"
+)
+
+crew = Crew(
+    agents=[researcher],
+    tasks=[research_task],
+    memory=memory,
+    verbose=True
+)
+
+# Context from previous research sessions
+result = crew.kickoff(inputs={"topic": "Machine Learning Trends"})</code></pre>
+
+      <h3>Hierarchical Research Crew</h3>
+      <div class="code-label">Python - Hierarchical Process with Manager</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew, Process
+
+# Manager agent delegates and coordinates
+manager = Agent(
+    role="Research Manager",
+    goal="Coordinate research efforts and ensure quality",
+    backstory="Senior research director with 20 years experience",
+    tools=[],
+    llm="gpt-4"
+)
+
+# Specialized researchers
+market_researcher = Agent(
+    role="Market Researcher",
+    goal="Research market trends and competitive landscape",
+    backstory="Specializes in market analysis",
+    tools=[SerperDevTool()],
+    llm="gpt-4"
+)
+
+technical_researcher = Agent(
+    role="Technical Researcher",
+    goal="Research technical specifications and capabilities",
+    backstory="Deep technical expertise",
+    tools=[SerperDevTool()],
+    llm="gpt-4"
+)
+
+# Define research tasks
+market_task = Task(
+    description="Analyze market position of {company}",
+    agent=market_researcher,
+    expected_output="Market analysis report"
+)
+
+tech_task = Task(
+    description="Analyze technical capabilities of {company}",
+    agent=technical_researcher,
+    expected_output="Technical capabilities report"
+)
+
+synthesis_task = Task(
+    description="Combine market and technical insights into executive summary",
+    agent=manager,
+    expected_output="Executive summary report"
+)
+
+# Use hierarchical process
+crew = Crew(
+    agents=[manager, market_researcher, technical_researcher],
+    tasks=[market_task, tech_task, synthesis_task],
+    manager_agent=manager,
+    process=Process.hierarchical,
+    verbose=True
+)
+
+result = crew.kickoff(inputs={"company": "TechCorp"})</code></pre>
+
+      <h3>Custom Research Tools</h3>
+      <div class="code-label">Python - Tool Definition</div>
+      <pre><code class="language-python">from crewai_tools import BaseTool
+from typing import Type
+from pydantic import BaseModel, Field
+
+class ApiSearchInput(BaseModel):
+    query: str = Field(..., description="Search query")
+    max_results: int = Field(default=10, description="Maximum results to return")
+
+class CustomApiSearchTool(BaseTool):
+    name: str = "custom_api_search"
+    description: str = "Search custom internal APIs for research data"
+    args_schema: Type[BaseModel] = ApiSearchInput
+
+    def _run(self, query: str, max_results: int = 10) -> str:
+        # Implementation of custom search logic
+        results = self.query_internal_api(query, max_results)
+        return self.format_results(results)
+
+    def query_internal_api(self, query: str, limit: int) -> list:
+        # Connect to proprietary database or API
+        pass
+
+    def format_results(self, results: list) -> str:
+        # Format results for agent consumption
+        pass
+
+# Use custom tool in agent
+researcher = Agent(
+    role="Internal Researcher",
+    goal="Research using company data",
+    tools=[CustomApiSearchTool()],
+    llm="gpt-4"
+)</code></pre>
+
+      <h3>Error Handling & Retries</h3>
+      <div class="code-label">Python - Robust Research Workflow</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew, Task
+from crewai_tools import SerperDevTool
+import asyncio
+
+# Agent with retry configuration
+researcher = Agent(
+    role="Research Analyst",
+    goal="Research the topic thoroughly",
+    tools=[SerperDevTool()],
+    max_retries=3,
+    allow_delegation=True,
+    function_calling_llm="gpt-4"
+)
+
+# Task with callbacks for monitoring
+research_task = Task(
+    description="Research {topic} comprehensively",
+    agent=researcher,
+    expected_output="Detailed research report",
+    callback=lambda result: on_task_complete(result),
+)
+
+def on_task_complete(result):
+    """Callback when task completes"""
+    print(f"Task completed: {result.description}")
+    print(f"Output: {result.pydantic_object}")
+
+# Async execution
+async def run_research():
+    crew = Crew(
+        agents=[researcher],
+        tasks=[research_task],
+        verbose=True
+    )
+    
+    try:
+        result = await crew.kickoff_async(
+            inputs={"topic": "Quantum Computing"}
+        )
+        return result
+    except Exception as e:
+        print(f"Research failed: {e}")
+        # Implement fallback logic
+        return None
+
+# Execute
+result = asyncio.run(run_research())</code></pre>
+
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Clearly define agent roles and specialized expertise</li>
+        <li>Use sequential process for dependent research phases</li>
+        <li>Implement tool-use constraints to prevent hallucinations</li>
+        <li>Add memory systems for cross-session learning</li>
+        <li>Monitor agent callbacks for debugging</li>
+        <li>Set appropriate max_retries for fault tolerance</li>
+        <li>Test crew workflows with realistic inputs</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

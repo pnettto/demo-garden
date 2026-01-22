@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrewAI - Technology Overview</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <span>CrewAI</span>
+  </div>
+
+  <main>
+    <section class="overview-header">
+      <h1>CrewAI</h1>
+      <p>Framework for orchestrating autonomous AI agents that collaborate to solve complex, multi-step tasks through role-based workflows.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>What is CrewAI?</h2>
+      <p>CrewAI enables developers to build multi-agent systems where specialized agents with specific roles work together. Each agent can have access to tools, can delegate tasks, and can communicate with other agents. It emphasizes sequential task execution with agent roles, tools, and goals.</p>
+      <h3>Core Concepts</h3>
+      <ul>
+        <li><strong>Agents:</strong> Autonomous entities with specific roles and capabilities</li>
+        <li><strong>Tasks:</strong> Specific work items assigned to agents</li>
+        <li><strong>Tools:</strong> Functions agents can call to gather info or perform actions</li>
+        <li><strong>Processes:</strong> Workflow definitions (Sequential, Hierarchical)</li>
+        <li><strong>Callbacks:</strong> Event hooks for monitoring agent activities</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Typical Use Cases</h2>
+      <ul class="use-cases-list">
+        <li class="use-case-item">
+          <a href="crewai-usecase-1.html" style="text-decoration: none; color: inherit;">
+            <strong>Research & Analysis</strong>
+            <p>Multi-agent research pipelines gathering and synthesizing information from diverse sources.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="crewai-usecase-2.html" style="text-decoration: none; color: inherit;">
+            <strong>Content Generation</strong>
+            <p>Teams of specialized agents creating high-quality, multi-format content collaboratively.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="crewai-usecase-3.html" style="text-decoration: none; color: inherit;">
+            <strong>Software Development</strong>
+            <p>Agent teams handling planning, development, testing, and documentation cycles.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="crewai-usecase-4.html" style="text-decoration: none; color: inherit;">
+            <strong>Customer Support</strong>
+            <p>Coordinated agents for problem resolution, escalation, and customer satisfaction.</p>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Mental Model</h2>
+      <p>Think of CrewAI as a team manager. You define team members with specific roles and expertise (agents), give them tasks to complete, and the manager coordinates their work. Each agent does their part, collaborates with teammates, and together they accomplish complex objectives.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Architecture Overview</h2>
+      <pre><code>
+[Task Queue]
+       ↓
+[Crew Manager]
+       ├─ Agent 1 (Role: Researcher)
+       ├─ Agent 2 (Role: Analyzer)
+       └─ Agent 3 (Role: Writer)
+       ↓
+[Tool Registry] ← → [External APIs]
+       ↓
+[Execution Process] (Sequential, Hierarchical)
+       ↓
+[Output / Results]
+      </code></pre>
+      <p>Tasks flow through the crew manager, which delegates to agents based on their roles. Each agent uses available tools and communicates results. The process orchestrator determines execution order and coordination.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Key Concepts Glossary</h2>
+      <ul>
+        <li><strong>Agent:</strong> Specialized autonomous entity with a defined role, goal, and backstory</li>
+        <li><strong>Task:</strong> Specific unit of work assigned to an agent with expected outputs</li>
+        <li><strong>Process:</strong> Execution strategy (Sequential tasks in order, Hierarchical with delegation)</li>
+        <li><strong>Tool:</strong> Function or API that agents can invoke to gather info or perform actions</li>
+        <li><strong>Crew:</strong> Collection of agents and their orchestration strategy</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>When to Use CrewAI</h2>
+      <p><strong>Choose CrewAI if you need:</strong></p>
+      <ul>
+        <li>Role-based multi-agent teams with clear task assignment</li>
+        <li>Sequential or hierarchical workflow execution</li>
+        <li>Specialized agents collaborating on complex projects</li>
+      </ul>
+      <p><strong>Consider alternatives if:</strong></p>
+      <ul>
+        <li>You need infrastructure orchestration (try Terraform)</li>
+        <li>You prefer flexible component composition (try LangChain)</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Getting Started</h2>
+      <p>Install CrewAI and create your first crew:</p>
+      <pre><code class="language-bash">pip install crewai
+crewai create crew my-crew</code></pre>
+      <p><a href="https://docs.crewai.com" target="_blank">→ CrewAI Documentation</a></p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Resources for Further Learning</h2>
+      <ul>
+        <li><a href="https://docs.crewai.com" target="_blank">Official Documentation</a> - Complete guides and API reference</li>
+        <li><a href="https://github.com/joaomdmoura/crewai" target="_blank">GitHub Repository</a> - Source code and examples</li>
+        <li><a href="https://docs.crewai.com/tutorials" target="_blank">Tutorials</a> - Step-by-step guides for common patterns</li>
+        <li><a href="https://discord.com/invite/X4JWEzVDfJ" target="_blank">Discord Community</a> - Active developer community</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>
