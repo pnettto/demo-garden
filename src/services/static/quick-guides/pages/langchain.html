@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LangChain - Technology Overview</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <span>LangChain</span>
+  </div>
+
+  <main>
+    <section class="overview-header">
+      <h1>LangChain</h1>
+      <p>Comprehensive framework for building LLM-powered applications with composable components, memory management, and agent capabilities.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>What is LangChain?</h2>
+      <p>LangChain is a library that enables developers to build sophisticated LLM applications by providing abstractions for chains, agents, memory, and document processing. It simplifies integration with various LLMs, vector stores, and external tools.</p>
+      <h3>Core Components</h3>
+      <ul>
+        <li><strong>LLMs & Chat Models:</strong> Unified interface across different models</li>
+        <li><strong>Prompts:</strong> Template management and dynamic prompt construction</li>
+        <li><strong>Chains:</strong> Sequential combinations of components</li>
+        <li><strong>Memory:</strong> Conversation history and context management</li>
+        <li><strong>Agents:</strong> Autonomous decision-making with tool use</li>
+        <li><strong>Document Loaders:</strong> Integration with various data sources</li>
+        <li><strong>Vector Stores:</strong> RAG (Retrieval Augmented Generation) support</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Typical Use Cases</h2>
+      <ul class="use-cases-list">
+        <li class="use-case-item">
+          <a href="langchain-usecase-1.html" style="text-decoration: none; color: inherit;">
+            <strong>RAG Systems</strong>
+            <p>Retrieval-augmented generation combining LLMs with proprietary documents and data.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="langchain-usecase-2.html" style="text-decoration: none; color: inherit;">
+            <strong>Conversational AI</strong>
+            <p>Building chatbots and assistants with multi-turn conversations and memory.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="langchain-usecase-3.html" style="text-decoration: none; color: inherit;">
+            <strong>Task Automation</strong>
+            <p>Autonomous agents performing complex workflows with tool integration.</p>
+          </a>
+        </li>
+        <li class="use-case-item">
+          <a href="langchain-usecase-4.html" style="text-decoration: none; color: inherit;">
+            <strong>Data Analysis</strong>
+            <p>LLM-powered analysis and insights generation from structured and unstructured data.</p>
+          </a>
+        </li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Mental Model</h2>
+      <p>Think of LangChain as building blocks for LLM applications. You compose primitive pieces (models, prompts, memory, tools) into chains that flow data through multiple processing steps. Each link adds capability—prompt formatting, model inference, tool calling, context retrieval.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Architecture Overview</h2>
+      <pre><code>
+[Input]
+   ↓
+[Prompt Template]
+   ↓
+[Language Model]
+   ↓
+[Output Parser]
+   ↓
+[Memory / History] ← → [Vector Store / RAG]
+   ↓
+[Tool / Function Calls]
+   ↓
+[Result]
+      </code></pre>
+      <p>LangChain chains connect LLMs with memory, document processing, and external tools. Each component is composable, allowing flexible architectures from simple chains to complex agent loops.</p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Key Concepts Glossary</h2>
+      <ul>
+        <li><strong>Chain:</strong> Sequence of components where output flows to next input</li>
+        <li><strong>Prompt:</strong> Template for formatting input to language models</li>
+        <li><strong>Agent:</strong> Loop using LLM to decide tool calls and reason about results</li>
+        <li><strong>Memory:</strong> Persistent context from previous conversations</li>
+        <li><strong>RAG (Retrieval Augmented Generation):</strong> Combining LLM with retrieved documents</li>
+        <li><strong>Vector Store:</strong> Database for semantic search of documents</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>When to Use LangChain</h2>
+      <p><strong>Choose LangChain if you need:</strong></p>
+      <ul>
+        <li>Flexible composition of LLM components for custom architectures</li>
+        <li>RAG systems combining LLMs with proprietary documents</li>
+        <li>Support for multiple LLM providers and vector databases</li>
+      </ul>
+      <p><strong>Consider alternatives if:</strong></p>
+      <ul>
+        <li>You need team-based orchestration with role assignment (try CrewAI)</li>
+        <li>You prefer higher-level abstractions for specific domains</li>
+      </ul>
+    </section>
+
+    <section class="overview-section">
+      <h2>Getting Started</h2>
+      <p>Install LangChain and create a simple chain:</p>
+      <pre><code class="language-bash">pip install langchain langchain-openai
+python -c "from langchain_openai import ChatOpenAI; model = ChatOpenAI()"</code></pre>
+      <p><a href="https://python.langchain.com" target="_blank">→ LangChain Documentation</a></p>
+    </section>
+
+    <section class="overview-section">
+      <h2>Resources for Further Learning</h2>
+      <ul>
+        <li><a href="https://python.langchain.com/docs/" target="_blank">Official Documentation</a> - Comprehensive guides and API docs</li>
+        <li><a href="https://github.com/langchain-ai/langchain" target="_blank">GitHub Repository</a> - Source code and examples</li>
+        <li><a href="https://python.langchain.com/docs/tutorials" target="_blank">Tutorials</a> - Guided projects for common patterns</li>
+        <li><a href="https://discord.gg/6adMQxSpJS" target="_blank">Discord Community</a> - Developer support and discussions</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

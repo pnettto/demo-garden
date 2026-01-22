@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problem Solving & Decision Making - Google ADK</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <a href="google-adk.html">Google ADK</a> / <span>Problem Solving & Decision Making</span>
+  </div>
+
+  <main>
+    <a href="google-adk.html" class="back-link">← Back to Google ADK</a>
+
+    <section class="use-case-detail">
+      <h2>Problem Solving & Decision Making with Google ADK</h2>
+      <p>Autonomous agents that reason through complex problems, evaluate alternatives, and make decisions using multi-step reasoning.</p>
+
+      <h3>Overview</h3>
+      <p>ADK enables agents to solve complex problems by breaking them into sub-problems, reasoning about solutions, and choosing optimal actions from multiple alternatives.</p>
+
+      <h3>Problem-Solving Agent Framework</h3>
+      <div class="code-label">Python - Problem Solver</div>
+      <pre><code class="language-python">from google_adk import Agent, Reasoning, OptionEvaluation
+from typing import List, Dict, Any
+
+class ProblemSolverAgent(Agent):
+    def __init__(self):
+        super().__init__()
+        self.reasoning_engine = Reasoning()
+        self.evaluator = OptionEvaluation()
+    
+    @Tool(description="Generate possible solutions")
+    def brainstorm_solutions(self, problem: str, constraints: List[str]) -> List[str]:
+        """Generate creative solutions"""
+        return ["Solution 1: ...", "Solution 2: ...", "Solution 3: ..."]
+    
+    @Tool(description="Evaluate solution feasibility")
+    def evaluate_solution(self, solution: str, criteria: Dict) -> Dict:
+        """Score solution against criteria"""
+        return {
+            "feasibility": 0.85,
+            "cost": 1000,
+            "time_estimate": "5 days",
+            "risk_level": "medium"
+        }
+    
+    async def solve_problem(self, problem: str, constraints: List[str] = None):
+        """Agent autonomously solves problem through reasoning"""
+        
+        # Step 1: Understand and decompose problem
+        analysis = await self.reasoning_engine.analyze(problem)
+        
+        # Step 2: Generate candidate solutions
+        solutions = self.brainstorm_solutions(problem, constraints or [])
+        
+        # Step 3: Evaluate each solution
+        evaluations = []
+        for solution in solutions:
+            eval_result = self.evaluate_solution(solution, {
+                "cost": {"max": 5000},
+                "time": {"max": "10 days"},
+                "risk": {"acceptable": ["low", "medium"]}
+            })
+            evaluations.append({
+                "solution": solution,
+                "evaluation": eval_result,
+                "score": self.calculate_score(eval_result)
+            })
+        
+        # Step 4: Select best solution
+        best = max(evaluations, key=lambda x: x["score"])
+        
+        return {
+            "problem": problem,
+            "analysis": analysis,
+            "solutions_considered": len(solutions),
+            "recommended": best["solution"],
+            "score": best["score"],
+            "all_evaluations": evaluations
+        }
+    
+    def calculate_score(self, eval_result: Dict) -> float:
+        """Score solution based on criteria"""
+        return eval_result.get("feasibility", 0.5)</code></pre>
+
+      <h3>Decision-Making with Trade-offs</h3>
+      <div class="code-label">Python - Decision Making Agent</div>
+      <pre><code class="language-python">from google_adk import Agent, DecisionTree, TradeOffAnalysis
+
+class DecisionMakingAgent(Agent):
+    def __init__(self):
+        super().__init__()
+        self.decision_tree = DecisionTree()
+        self.tradeoff_analyzer = TradeOffAnalysis()
+    
+    async def make_strategic_decision(self, context: Dict, options: List[Dict]):
+        """Agent makes decision considering trade-offs"""
+        
+        # Analyze trade-offs between options
+        analysis = await self.tradeoff_analyzer.analyze(
+            options=options,
+            objectives=["maximize_profit", "minimize_risk", "maximize_customer_satisfaction"]
+        )
+        
+        # Reasoning about best choice
+        decision = await self.decision_tree.evaluate(
+            options=options,
+            analysis=analysis,
+            context=context
+        )
+        
+        return {
+            "options_evaluated": len(options),
+            "tradeoffs": analysis,
+            "recommended_option": decision["best_option"],
+            "reasoning": decision["rationale"]
+        }</code></pre>
+
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Enable agents to decompose complex problems into manageable sub-problems</li>
+        <li>Provide clear evaluation criteria for decision making</li>
+        <li>Implement trade-off analysis for competing objectives</li>
+        <li>Enable iterative refinement if initial solution is unsatisfactory</li>
+        <li>Document reasoning process for transparency and learning</li>
+        <li>Test agents with diverse problem scenarios</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

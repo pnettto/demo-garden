@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Software Development - CrewAI</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <a href="crewai.html">CrewAI</a> / <span>Software Development</span>
+  </div>
+
+  <main>
+    <a href="crewai.html" class="back-link">← Back to CrewAI</a>
+
+    <section class="use-case-detail">
+      <h2>Software Development with CrewAI</h2>
+      <p>Orchestrating autonomous agents to handle the full software development lifecycle: planning, coding, testing, documentation, and deployment.</p>
+
+      <h3>Overview</h3>
+      <p>Development crews include architects who design solutions, developers who implement features, QA agents who test thoroughly, and documentation specialists. This parallels real development teams while enabling automated coordination.</p>
+
+      <h3>Development Team Structure</h3>
+      <ul>
+        <li><strong>Architect:</strong> Designs system architecture and technical specifications</li>
+        <li><strong>Senior Developer:</strong> Implements core logic and complex features</li>
+        <li><strong>QA Engineer:</strong> Writes tests and validates functionality</li>
+        <li><strong>Documentation Specialist:</strong> Creates API docs and user guides</li>
+      </ul>
+
+      <h3>Full Development Workflow</h3>
+      <div class="code-label">Python - Development Crew Pipeline</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+from crewai_tools import FileWriterTool, FileReadTool, BrowserTool
+import json
+
+# Architect Agent
+architect = Agent(
+    role="Software Architect",
+    goal="Design scalable, maintainable system architecture",
+    backstory="Senior architect with 20 years experience",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+# Developer Agent
+developer = Agent(
+    role="Senior Developer",
+    goal="Write clean, efficient, production-ready code",
+    backstory="Full-stack engineer with expertise in Python, Go, and JavaScript",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+# QA Agent
+qa_engineer = Agent(
+    role="QA Engineer",
+    goal="Ensure code quality and comprehensive test coverage",
+    backstory="QA specialist with 12 years test automation experience",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+# Documentation Agent
+doc_specialist = Agent(
+    role="Technical Documentation Specialist",
+    goal="Create clear, comprehensive technical documentation",
+    backstory="Technical writer with API documentation expertise",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+# Task 1: Architecture Design
+architecture_task = Task(
+    description="""Design architecture for: {feature_request}
+    Include:
+    - System components and their interactions
+    - Database schema (if applicable)
+    - API endpoints design
+    - Security considerations
+    - Scalability analysis
+    - Technology stack recommendations""",
+    agent=architect,
+    expected_output="Detailed architecture document in markdown"
+)
+
+# Task 2: Implementation
+implementation_task = Task(
+    description="""Implement the feature based on architecture:
+    - Write production-ready code in {language}
+    - Follow {style_guide} coding standards
+    - Include proper error handling
+    - Add logging at appropriate levels
+    - Implement configuration management
+    - Use environment variables for config""",
+    agent=developer,
+    expected_output="Complete implementation code"
+)
+
+# Task 3: Testing
+testing_task = Task(
+    description="""Write comprehensive tests:
+    - Unit tests for core functions (90%+ coverage)
+    - Integration tests for API endpoints
+    - Edge case and error scenario tests
+    - Performance tests if applicable
+    - Security tests for authentication/authorization
+    Use {test_framework}""",
+    agent=qa_engineer,
+    expected_output="Complete test suite with test cases"
+)
+
+# Task 4: Documentation
+documentation_task = Task(
+    description="""Create technical documentation:
+    - API documentation with examples
+    - Setup and installation guide
+    - Usage examples and patterns
+    - Configuration options
+    - Troubleshooting guide
+    - Contributing guidelines""",
+    agent=doc_specialist,
+    expected_output="Complete documentation in markdown"
+)
+
+# Create Development Crew
+dev_crew = Crew(
+    agents=[architect, developer, qa_engineer, doc_specialist],
+    tasks=[
+        architecture_task,
+        implementation_task,
+        testing_task,
+        documentation_task
+    ],
+    verbose=True,
+    process="sequential"
+)
+
+# Execute
+inputs = {
+    "feature_request": "Build user authentication system with OAuth 2.0 support",
+    "language": "Python",
+    "style_guide": "PEP 8",
+    "test_framework": "pytest"
+}
+
+result = dev_crew.kickoff(inputs=inputs)</code></pre>
+
+      <h3>Code Review & Optimization</h3>
+      <div class="code-label">Python - Code Review Crew</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+from crewai_tools import FileReadTool
+
+# Code Review Team
+code_reviewer = Agent(
+    role="Code Reviewer",
+    goal="Review code for quality, security, and best practices",
+    backstory="Senior engineer with 15 years peer review experience",
+    tools=[FileReadTool()],
+    llm="gpt-4"
+)
+
+performance_expert = Agent(
+    role="Performance Optimization Expert",
+    goal="Identify and suggest performance improvements",
+    backstory="Performance engineer specializing in optimization",
+    tools=[],
+    llm="gpt-4"
+)
+
+security_specialist = Agent(
+    role="Security Specialist",
+    goal="Identify security vulnerabilities and risks",
+    backstory="Security expert with CISSP certification",
+    tools=[],
+    llm="gpt-4"
+)
+
+# Code Review Tasks
+review_task = Task(
+    description="""Review the provided code:
+    - Check for code style and readability
+    - Identify potential bugs or edge cases
+    - Verify error handling completeness
+    - Assess code reusability
+    - Check naming conventions
+    - Provide actionable feedback""",
+    agent=code_reviewer,
+    expected_output="Detailed code review with findings"
+)
+
+performance_task = Task(
+    description="""Analyze code for performance:
+    - Identify algorithmic inefficiencies
+    - Check for N+1 queries or similar issues
+    - Suggest caching strategies if applicable
+    - Recommend data structure improvements
+    - Provide performance benchmarks""",
+    agent=performance_expert,
+    expected_output="Performance analysis and recommendations"
+)
+
+security_task = Task(
+    description="""Security analysis of code:
+    - Check for injection vulnerabilities
+    - Verify authentication/authorization implementation
+    - Check for sensitive data exposure
+    - Assess cryptographic implementations
+    - Check dependencies for known vulnerabilities""",
+    agent=security_specialist,
+    expected_output="Security findings and remediation steps"
+)
+
+review_crew = Crew(
+    agents=[code_reviewer, performance_expert, security_specialist],
+    tasks=[review_task, performance_task, security_task],
+    verbose=True
+)</code></pre>
+
+      <h3>Bug Investigation & Fixing</h3>
+      <div class="code-label">Python - Debug & Fix Workflow</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+
+# Debug Team
+debugger = Agent(
+    role="Debug Specialist",
+    goal="Investigate and understand bugs systematically",
+    backstory="Expert debugger with 18 years experience",
+    tools=[FileReadTool(), BrowserTool()],
+    llm="gpt-4"
+)
+
+bug_fixer = Agent(
+    role="Bug Fixer",
+    goal="Implement reliable fixes for identified issues",
+    backstory="Developer specializing in complex bug fixes",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+regression_tester = Agent(
+    role="Regression Tester",
+    goal="Ensure fixes don't introduce new issues",
+    backstory="QA engineer specializing in regression testing",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+# Bug Investigation
+investigation_task = Task(
+    description="""Investigate the bug:
+    - Analyze error logs and stack traces
+    - Reproduce the issue systematically
+    - Identify root cause
+    - Check related code sections
+    - Document findings with examples""",
+    agent=debugger,
+    expected_output="Bug analysis report with root cause"
+)
+
+# Fix Implementation
+fix_task = Task(
+    description="""Implement the fix:
+    - Apply minimal, targeted changes
+    - Maintain code consistency
+    - Include inline comments explaining changes
+    - Update related documentation if needed
+    - Consider similar issues in codebase""",
+    agent=bug_fixer,
+    expected_output="Fixed code with explanation"
+)
+
+# Regression Testing
+regression_task = Task(
+    description="""Create regression tests:
+    - Write test case that reproduces original bug
+    - Verify fix resolves the issue
+    - Check that other tests still pass
+    - Test edge cases around the fix
+    - Document test coverage""",
+    agent=regression_tester,
+    expected_output="Regression test suite"
+)
+
+debug_crew = Crew(
+    agents=[debugger, bug_fixer, regression_tester],
+    tasks=[investigation_task, fix_task, regression_task],
+    verbose=True
+)</code></pre>
+
+      <h3>CI/CD Pipeline Generation</h3>
+      <div class="code-label">Python - Pipeline Configuration</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+
+# DevOps Agent
+devops_engineer = Agent(
+    role="DevOps Engineer",
+    goal="Design and implement CI/CD pipelines",
+    backstory="DevOps expert with Kubernetes expertise",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+# Generate CI/CD Config
+pipeline_task = Task(
+    description="""Generate CI/CD pipeline configuration:
+    - For platform: {platform}
+    - Language: {language}
+    - Include stages: lint, test, build, deploy
+    - Implement automated testing
+    - Add code coverage requirements
+    - Setup notifications
+    - Add deployment safeguards""",
+    agent=devops_engineer,
+    expected_output="Complete pipeline configuration"
+)
+
+# Infrastructure as Code
+infrastructure_task = Task(
+    description="""Generate infrastructure configuration:
+    - Environment setup for {environment}
+    - Container configuration if applicable
+    - Database and service setup
+    - Security group and networking
+    - Monitoring and logging setup
+    Use {iac_tool}""",
+    agent=devops_engineer,
+    expected_output="IaC configuration files"
+)
+
+devops_crew = Crew(
+    agents=[devops_engineer],
+    tasks=[pipeline_task, infrastructure_task],
+    verbose=True
+)</code></pre>
+
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Use sequential process to maintain dependency order</li>
+        <li>Include both forward development and review processes</li>
+        <li>Implement delegation for complex sub-tasks</li>
+        <li>Use callbacks to track development progress</li>
+        <li>Store project templates and coding standards as context</li>
+        <li>Create separate crews for different workflows (dev, review, debug)</li>
+        <li>Test agent outputs against actual project requirements</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>
