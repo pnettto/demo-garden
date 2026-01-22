@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Cloud Run - Terraform</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <a href="terraform.html">Terraform</a> / <span>Google Cloud Run Deployment</span>
+  </div>
+
+  <main>
+    <a href="terraform.html" class="back-link">← Back to Terraform</a>
+
+    <section class="use-case-detail">
+      <h2>Google Cloud Run Deployment with Terraform</h2>
+      <p>Provisioning and managing containerized applications on Google Cloud Run using Infrastructure as Code, enabling consistent, repeatable deployments.</p>
+
+      <h3>Overview</h3>
+      <p>Terraform enables you to define Cloud Run services declaratively, managing container images, environment variables, IAM roles, and all associated infrastructure in version control. This approach ensures consistent deployments and easy disaster recovery.</p>
+
+      <h3>Basic Cloud Run Service</h3>
+      <div class="code-label">HCL - Simple Cloud Run Deployment</div>
+      <pre><code class="language-hcl">terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "google" {
+  project = var.gcp_project
+  region  = var.gcp_region
+}
+
+# Cloud Run Service
+resource "google_cloud_run_service" "api" {
+  name     = "my-api"
+  location = var.gcp_region
+
+  template {
+    spec {
+      containers {
+        image = "gcr.io/${var.gcp_project}/my-app:latest"
+
+        env {
+          name  = "ENVIRONMENT"
+          value = "production"
+        }
+
+        env {
+          name  = "LOG_LEVEL"
+          value = "info"
+        }
+
+        resources {
+          limits = {
+            cpu    = "1"
+            memory = "512Mi"
+          }
+        }
+      }
+
+      service_account_name = google_service_account.cloud_run.email
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+# Allow public access
+resource "google_cloud_run_service_iam_member" "public" {
+  service       = google_cloud_run_service.api.name
+  location      = google_cloud_run_service.api.location
+  role          = "roles/run.invoker"
+  member        = "allUsers"
+}
+
+# Service Account
+resource "google_service_account" "cloud_run" {
+  account_id   = "cloud-run-sa"
+  display_name = "Cloud Run Service Account"
+}
+
+# Output the service URL
+output "cloud_run_url" {
+  value = google_cloud_run_service.api.status[0].url
+}</code></pre>
+
+      <h3>Advanced Cloud Run with Custom Domain</h3>
+      <div class="code-label">HCL - Cloud Run with Domain and IAM</div>
+      <pre><code class="language-hcl"># Create Cloud Run service with auto-scaling
+resource "google_cloud_run_service" "app" {
+  name     = "web-app"
+  location = "us-central1"
+
+  template {
+    metadata {
+      annotations = {
+        "autoscaling.knative.dev/maxScale" = "100"
+        "autoscaling.knative.dev/minScale" = "1"
+      }
+    }
+
+    spec {
+      containers {
+        image = "gcr.io/${var.gcp_project}/web-app:v1.2.3"
+
+        # Health check endpoint
+        liveness_probe {
+          http_get {
+            path = "/health"
+            port = 8080
+          }
+          initial_delay_seconds = 5
+          period_seconds        = 10
+        }
+
+        startup_probe {
+          http_get {
+            path = "/startup"
+            port = 8080
+          }
+          failure_threshold = 3
+          period_seconds    = 10
+        }
+
+        env {
+          name  = "DATABASE_URL"
+          value = google_sql_database_instance.postgres.connection_name
+        }
+
+        env {
+          name  = "API_KEY"
+          value_from {
+            secret_key_ref {
+              name = google_secret_manager_secret.api_key.id
+              key  = "latest"
+            }
+          }
+        }
+
+        ports {
+          container_port = 8080
+          name           = "http1"
+        }
+      }
+
+      service_account_name = google_service_account.app.email
+      timeout_seconds      = 300
+      memory_limit         = "2Gi"
+      cpu_throttling       = false
+    }
+  }
+
+  traffic {
+    percent         = 100
+    latest_revision = true
+  }
+}
+
+# Cloud Run domain mapping
+resource "google_cloud_run_domain_mapping" "app" {
+  location = "us-central1"
+  name     = "app.example.com"
+
+  spec {
+    route_name = google_cloud_run_service.app.name
+  }
+}
+
+# Cloud SQL database
+resource "google_sql_database_instance" "postgres" {
+  name             = "postgres-db"
+  database_version = "POSTGRES_15"
+
+  settings {
+    tier      = "db-f1-micro"
+    disk_size = 20
+
+    backup_configuration {
+      enabled  = true
+      location = "us"
+    }
+  }
+
+  deletion_protection = true
+}
+
+# Secret for API key
+resource "google_secret_manager_secret" "api_key" {
+  secret_id = "api-key"
+
+  replication {
+    auto {}
+  }
+}
+
+# IAM: Grant Cloud Run access to database
+resource "google_sql_database_instance_iam_member" "cloud_run" {
+  instance = google_sql_database_instance.postgres.name
+  role     = "roles/cloudsql.client"
+  member   = "serviceAccount:${google_service_account.app.email}"
+}
+
+# IAM: Grant Cloud Run access to secrets
+resource "google_secret_manager_secret_iam_member" "cloud_run" {
+  secret_id = google_secret_manager_secret.api_key.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.app.email}"
+}
+
+output "cloud_run_url" {
+  value = google_cloud_run_service.app.status[0].url
+}
+
+output "domain_url" {
+  value = "https://${google_cloud_run_domain_mapping.app.name}"
+}</code></pre>
+
+      <h3>Variables and Terraform Configuration</h3>
+      <div class="code-label">HCL - variables.tf</div>
+      <pre><code class="language-hcl">variable "gcp_project" {
+  description = "GCP project ID"
+  type        = string
+}
+
+variable "gcp_region" {
+  description = "GCP region"
+  type        = string
+  default     = "us-central1"
+}
+
+variable "app_image" {
+  description = "Docker image for Cloud Run"
+  type        = string
+}
+
+variable "app_port" {
+  description = "Port the app listens on"
+  type        = number
+  default     = 8080
+}
+
+variable "min_instances" {
+  description = "Minimum number of instances"
+  type        = number
+  default     = 1
+}
+
+variable "max_instances" {
+  description = "Maximum number of instances"
+  type        = number
+  default     = 100
+}
+
+variable "environment" {
+  description = "Environment name (dev, staging, prod)"
+  type        = string
+}
+
+variable "labels" {
+  description = "Labels to apply to resources"
+  type        = map(string)
+  default = {
+    team     = "platform"
+    managed  = "terraform"
+  }
+}</code></pre>
+
+      <h3>Deployment with Terraform</h3>
+      <div class="code-label">Bash - Terraform Workflow</div>
+      <pre><code class="language-bash"># Initialize Terraform
+terraform init
+
+# Validate configuration
+terraform validate
+
+# Format code
+terraform fmt -recursive
+
+# Plan deployment
+terraform plan -out=tfplan -var-file="prod.tfvars"
+
+# Review and apply
+terraform apply tfplan
+
+# Get outputs
+terraform output
+
+# Update service
+terraform apply -var-file="prod.tfvars" -auto-approve
+
+# Destroy resources (if needed)
+terraform destroy -var-file="prod.tfvars"</code></pre>
+
+      <h3>Environment-Specific Configuration</h3>
+      <div class="code-label">HCL - prod.tfvars</div>
+      <pre><code class="language-hcl">gcp_project  = "my-company-prod"
+gcp_region   = "us-central1"
+app_image    = "gcr.io/my-company-prod/api:v1.5.0"
+environment  = "production"
+min_instances = 5
+max_instances = 100
+
+labels = {
+  team      = "platform"
+  managed   = "terraform"
+  env       = "prod"
+  cost_center = "engineering"
+}</code></pre>
+
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Use version constraints for providers to ensure consistency</li>
+        <li>Store state in remote backend (Cloud Storage, Terraform Cloud)</li>
+        <li>Separate variables by environment using .tfvars files</li>
+        <li>Use modules to organize and reuse configuration</li>
+        <li>Implement proper IAM and service accounts with least privilege</li>
+        <li>Use health checks and startup probes for reliability</li>
+        <li>Version control all infrastructure code and review changes via pull requests</li>
+        <li>Implement state locking to prevent concurrent modifications</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

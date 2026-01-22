@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multi-Agent Collaboration - Google ADK</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <a href="google-adk.html">Google ADK</a> / <span>Multi-Agent Collaboration</span>
+  </div>
+
+  <main>
+    <a href="google-adk.html" class="back-link">← Back to Google ADK</a>
+
+    <section class="use-case-detail">
+      <h2>Multi-Agent Collaboration with Google ADK</h2>
+      <p>Coordinated teams of autonomous agents working together on shared objectives, communicating and dividing responsibilities.</p>
+
+      <h3>Overview</h3>
+      <p>ADK supports multi-agent systems where specialized agents collaborate, share information, coordinate actions, and achieve complex goals through teamwork.</p>
+
+      <h3>Multi-Agent Team Framework</h3>
+      <div class="code-label">Python - Multi-Agent Team</div>
+      <pre><code class="language-python">from google_adk import Agent, Team, Communication, Coordination
+
+class ResearchAgent(Agent):
+    """Gathers and analyzes data"""
+    async def execute_task(self, task: str):
+        return {"data": [], "insights": []}
+
+class AnalysisAgent(Agent):
+    """Performs deep analysis on data"""
+    async def execute_task(self, data: list):
+        return {"analysis": {}, "recommendations": []}
+
+class ReportingAgent(Agent):
+    """Compiles results into reports"""
+    async def execute_task(self, analysis: dict):
+        return {"report": "...", "format": "pdf"}
+
+# Create team
+team = Team(name="DataAnalysisTeam")
+team.add_agent(ResearchAgent(name="Researcher"))
+team.add_agent(AnalysisAgent(name="Analyst"))
+team.add_agent(ReportingAgent(name="Reporter"))
+
+# Define workflow
+class TeamWorkflow:
+    async def execute(self, goal: str):
+        """Orchestrate team collaboration"""
+        
+        # Research agent gathers data
+        research_result = await team.get_agent("Researcher").execute_task(goal)
+        
+        # Analysis agent processes findings
+        analysis_result = await team.get_agent("Analyst").execute_task(research_result["data"])
+        
+        # Reporting agent creates output
+        report = await team.get_agent("Reporter").execute_task(analysis_result)
+        
+        return report
+
+workflow = TeamWorkflow()
+result = await workflow.execute("Analyze Q1 sales data")</code></pre>
+
+      <h3>Agent Communication and Coordination</h3>
+      <div class="code-label">Python - Inter-Agent Communication</div>
+      <pre><code class="language-python">from google_adk import Agent, MessageBus, Task, Resource
+
+class CoordinatedTeam(Agent):
+    def __init__(self):
+        super().__init__()
+        self.message_bus = MessageBus()
+        self.shared_resources = {}
+        self.agents = []
+    
+    async def coordinate_agents(self, main_goal: str):
+        """Coordinate multiple agents toward shared goal"""
+        
+        # Decompose main goal into sub-tasks
+        sub_tasks = await self.decompose_goal(main_goal)
+        
+        # Assign tasks to specialized agents
+        task_assignments = {}
+        for i, task in enumerate(sub_tasks):
+            agent = self.agents[i % len(self.agents)]
+            task_assignments[agent.name] = task
+        
+        # Execute tasks with inter-agent communication
+        results = {}
+        for agent_name, task in task_assignments.items():
+            agent = next(a for a in self.agents if a.name == agent_name)
+            
+            # Agent can request help or resources from other agents
+            result = await agent.execute_collaborative(
+                task=task,
+                message_bus=self.message_bus,
+                shared_resources=self.shared_resources
+            )
+            
+            results[agent_name] = result
+        
+        # Merge results from all agents
+        final_result = await self.merge_results(results)
+        
+        return final_result
+    
+    async def decompose_goal(self, goal: str):
+        """Break down complex goal into parallel sub-tasks"""
+        return [{"subtask": 1}, {"subtask": 2}, {"subtask": 3}]
+    
+    async def merge_results(self, results: dict):
+        """Combine results from multiple agents"""
+        return {"combined": results}</code></pre>
+
+      <h3>Hierarchical Agent Organization</h3>
+      <div class="code-label">Python - Manager and Worker Agents</div>
+      <pre><code class="language-python">from google_adk import Agent, Hierarchy, Delegation
+
+class ManagerAgent(Agent):
+    """High-level planning and coordination"""
+    def __init__(self, worker_agents: list):
+        super().__init__()
+        self.workers = worker_agents
+    
+    async def manage_project(self, project_goal: str):
+        """Manager delegates and monitors work"""
+        
+        # Create execution plan
+        plan = await self.create_plan(project_goal)
+        
+        # Delegate work to worker agents
+        job_assignments = await self.assign_jobs(plan)
+        
+        # Monitor progress
+        progress_tracker = {}
+        for worker, job in job_assignments.items():
+            status = await worker.execute_job(job)
+            progress_tracker[worker.name] = status
+            
+            # Manager adapts plan if needed
+            if not status.get("success", False):
+                plan = await self.replan_around_failure(plan, worker.name)
+        
+        return {"plan": plan, "results": progress_tracker}
+    
+    async def create_plan(self, goal: str):
+        """Manager creates high-level plan"""
+        return {"phases": [], "dependencies": []}
+    
+    async def assign_jobs(self, plan: dict):
+        """Delegate tasks to workers"""
+        return {agent: {"task": "..."} for agent in self.workers}
+    
+    async def replan_around_failure(self, plan: dict, failed_agent: str):
+        """Adapt if worker fails"""
+        return plan
+
+class WorkerAgent(Agent):
+    """Specialized task execution"""
+    async def execute_job(self, job: dict):
+        """Execute assigned job"""
+        try:
+            result = await self.perform_work(job)
+            return {"success": True, "result": result}
+        except Exception as e:
+            return {"success": False, "error": str(e)}</code></pre>
+
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Design agents with clear, complementary responsibilities</li>
+        <li>Use message passing for inter-agent communication</li>
+        <li>Implement clear protocols for task assignment and handoff</li>
+        <li>Enable agents to negotiate or request help from peers</li>
+        <li>Use resource sharing to reduce duplication</li>
+        <li>Monitor team coordination metrics and bottlenecks</li>
+        <li>Test team behavior under various failure scenarios</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>

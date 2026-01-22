@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Support - CrewAI</title>
+  <link rel="stylesheet" href="../styles/main.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+</head>
+<body>
+  <header>
+    <nav>
+      <h1>Tech Overview</h1>
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="../index.html#technologies">Technologies</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="breadcrumb">
+    <a href="../index.html">Home</a> / <a href="crewai.html">CrewAI</a> / <span>Customer Support</span>
+  </div>
+
+  <main>
+    <a href="crewai.html" class="back-link">← Back to CrewAI</a>
+
+    <section class="use-case-detail">
+      <h2>Customer Support with CrewAI</h2>
+      <p>Building intelligent customer support systems with coordinated agents for problem diagnosis, resolution, escalation, and satisfaction improvement.</p>
+
+      <h3>Overview</h3>
+      <p>Support crews include frontline agents for initial triage, technical specialists for complex issues, and supervisors for escalation and quality monitoring. This enables faster resolution and improved customer satisfaction.</p>
+
+      <h3>Support Team Structure</h3>
+      <ul>
+        <li><strong>Support Agent:</strong> Initial triage and common issue resolution</li>
+        <li><strong>Technical Specialist:</strong> Complex technical troubleshooting</li>
+        <li><strong>Billing Specialist:</strong> Handle account and billing issues</li>
+        <li><strong>Supervisor:</strong> Escalation management and quality assurance</li>
+      </ul>
+
+      <h3>Support Ticket Resolution Workflow</h3>
+      <div class="code-label">Python - Support Crew</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+from crewai_tools import FileReadTool, FileWriterTool, BrowserTool
+from pydantic import BaseModel
+from typing import Optional
+
+class SupportTicket(BaseModel):
+    ticket_id: str
+    customer_name: str
+    issue_description: str
+    category: str
+    priority: str
+    customer_history: Optional[str] = None
+
+# Support Agents
+support_agent = Agent(
+    role="Customer Support Representative",
+    goal="Provide friendly, efficient first-level support",
+    backstory="Support veteran with 8 years customer service experience",
+    tools=[FileReadTool()],
+    llm="gpt-4"
+)
+
+tech_specialist = Agent(
+    role="Technical Support Specialist",
+    goal="Troubleshoot complex technical issues",
+    backstory="Senior tech support engineer with deep product knowledge",
+    tools=[BrowserTool(), FileReadTool()],
+    llm="gpt-4"
+)
+
+billing_specialist = Agent(
+    role="Billing & Account Specialist",
+    goal="Handle billing, subscriptions, and account management",
+    backstory="Billing expert with accounting background",
+    tools=[FileReadTool()],
+    llm="gpt-4"
+)
+
+supervisor = Agent(
+    role="Support Supervisor",
+    goal="Ensure quality and manage escalations",
+    backstory="Former support team lead with 12 years experience",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+# Task 1: Initial Triage
+triage_task = Task(
+    description="""Analyze support ticket and provide initial response:
+    - Ticket ID: {ticket_id}
+    - Issue: {issue_description}
+    - Category: {category}
+    
+    Provide:
+    - Issue classification (Technical, Billing, General)
+    - Initial troubleshooting steps if applicable
+    - Estimate of resolution time
+    - Recommendation for specialist involvement
+    - Friendly, empathetic response to customer""",
+    agent=support_agent,
+    expected_output="Initial support response with recommendations"
+)
+
+# Task 2: Technical Investigation
+technical_task = Task(
+    description="""Perform technical investigation:
+    - Review customer account and history
+    - Research the reported issue
+    - Provide troubleshooting steps
+    - Identify potential root causes
+    - Create resolution action plan
+    - Prepare technical explanation for customer""",
+    agent=tech_specialist,
+    expected_output="Technical diagnosis with resolution steps"
+)
+
+# Task 3: Billing/Account Review
+billing_task = Task(
+    description="""If billing-related:
+    - Review account history and transactions
+    - Check subscription details
+    - Identify any discrepancies
+    - Propose resolution options
+    - Calculate any credits/refunds owed
+    - Document changes for audit trail""",
+    agent=billing_specialist,
+    expected_output="Account analysis with proposed resolution"
+)
+
+# Task 4: Quality Assurance & Escalation
+qa_task = Task(
+    description="""Review support process and determine next steps:
+    - Verify issue resolution is appropriate
+    - Check customer satisfaction considerations
+    - Determine if escalation needed
+    - Prepare escalation summary if required
+    - Create follow-up plan
+    - Update ticket status""",
+    agent=supervisor,
+    expected_output="Support resolution summary with follow-up plan"
+)
+
+# Create Support Crew
+support_crew = Crew(
+    agents=[support_agent, tech_specialist, billing_specialist, supervisor],
+    tasks=[triage_task, technical_task, billing_task, qa_task],
+    verbose=True,
+    process="sequential"
+)
+
+# Example ticket
+inputs = {
+    "ticket_id": "TICKET-12345",
+    "issue_description": "Cannot reset password for account",
+    "category": "Account",
+    "priority": "High"
+}
+
+result = support_crew.kickoff(inputs=inputs)</code></pre>
+
+      <h3>Real-Time Chat Support</h3>
+      <div class="code-label">Python - Live Chat Integration</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+import asyncio
+from typing import List
+
+class ChatMessage(BaseModel):
+    sender: str
+    content: str
+    timestamp: str
+
+class ChatSupportSystem:
+    def __init__(self):
+        self.support_agent = Agent(
+            role="Live Chat Support",
+            goal="Provide immediate helpful responses",
+            backstory="Friendly support agent trained for chat interactions",
+            tools=[],
+            llm="gpt-4"
+        )
+        
+        self.escalation_agent = Agent(
+            role="Chat Escalation Specialist",
+            goal="Handle complex issues requiring escalation",
+            backstory="Senior support specialist for high-value customers",
+            tools=[FileReadTool()],
+            llm="gpt-4"
+        )
+
+    async def handle_chat_message(self, message: str, chat_history: List[str]) -> str:
+        """Process incoming chat message"""
+        
+        # Initial agent response
+        response_task = Task(
+            description=f"""Customer message: {message}
+            
+Chat history context: {' '.join(chat_history[-3:])}
+
+Provide:
+- Helpful, concise response
+- Maximum 2-3 sentences initially
+- Offer to escalate if complex
+- Friendly tone""",
+            agent=self.support_agent,
+            expected_output="Chat response"
+        )
+        
+        crew = Crew(
+            agents=[self.support_agent],
+            tasks=[response_task],
+            verbose=False
+        )
+        
+        response = await crew.kickoff_async(inputs={})
+        return response
+
+async def run_chat_session(messages: List[str]) -> List[str]:
+    """Simulate chat session"""
+    chat_system = ChatSupportSystem()
+    responses = []
+    
+    for message in messages:
+        response = await chat_system.handle_chat_message(message, responses)
+        responses.append(response)
+    
+    return responses
+
+# Simulate customer chat
+customer_messages = [
+    "Hi, I'm having trouble with my account",
+    "I keep getting an error code 502",
+    "Can you escalate me to a specialist?"
+]
+
+responses = asyncio.run(run_chat_session(customer_messages))</code></pre>
+
+      <h3>Self-Service Knowledge Base</h3>
+      <div class="code-label">Python - Automated Article Generation</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+
+# Knowledge Base Agents
+researcher = Agent(
+    role="Knowledge Base Researcher",
+    goal="Research common customer issues",
+    backstory="Support analyst identifying patterns",
+    tools=[BrowserTool()],
+    llm="gpt-4"
+)
+
+writer = Agent(
+    role="Knowledge Base Writer",
+    goal="Create clear, helpful support articles",
+    backstory="Technical writer specializing in self-service content",
+    tools=[FileWriterTool()],
+    llm="gpt-4"
+)
+
+editor = Agent(
+    role="Knowledge Base Editor",
+    goal="Ensure quality and searchability of articles",
+    backstory="Content editor optimizing for discoverability",
+    tools=[],
+    llm="gpt-4"
+)
+
+# Research Task - Find Common Issues
+research_task = Task(
+    description="""Analyze support tickets from last month:
+    - Identify top 10 recurring issues
+    - Categorize by type (Technical, Account, Billing)
+    - Note resolution patterns
+    - Identify gaps in documentation""",
+    agent=researcher,
+    expected_output="List of issues suitable for KB articles"
+)
+
+# Article Writing Task
+writing_task = Task(
+    description="""Write knowledge base article for: {issue}
+    
+    Include:
+    - Clear problem statement
+    - Step-by-step troubleshooting
+    - Screenshots/visual aids descriptions
+    - Common variations of the issue
+    - When to contact support
+    - Related articles
+    
+    Format for web, optimize for scanning""",
+    agent=writer,
+    expected_output="Complete KB article"
+)
+
+# Editing Task
+editing_task = Task(
+    description="""Optimize article for self-service:
+    - Add searchable keywords
+    - Format with clear headings
+    - Create table of contents if long
+    - Add internal links to related articles
+    - Ensure consistency with other articles
+    - Validate technical accuracy""",
+    agent=editor,
+    expected_output="Publication-ready KB article"
+)
+
+kb_crew = Crew(
+    agents=[researcher, writer, editor],
+    tasks=[research_task, writing_task, editing_task],
+    verbose=True
+)</code></pre>
+
+      <h3>Feedback & Satisfaction Analysis</h3>
+      <div class="code-label">Python - CSAT Analysis Crew</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+
+# Analytics Team
+csat_analyst = Agent(
+    role="CSAT Analyst",
+    goal="Analyze customer satisfaction trends",
+    backstory="Data analyst specializing in customer metrics",
+    tools=[],
+    llm="gpt-4"
+)
+
+improvement_specialist = Agent(
+    role="Improvement Specialist",
+    goal="Identify and recommend support improvements",
+    backstory="Continuous improvement expert",
+    tools=[],
+    llm="gpt-4"
+)
+
+# CSAT Analysis
+csat_task = Task(
+    description="""Analyze CSAT data from last quarter:
+    - Calculate overall CSAT score
+    - Identify trends by category
+    - Compare to previous quarter
+    - Identify highest and lowest scoring categories
+    - Correlate with ticket volume
+    - Find correlations with resolution time""",
+    agent=csat_analyst,
+    expected_output="CSAT analysis report with trends"
+)
+
+# Improvement Recommendations
+improvement_task = Task(
+    description="""Based on CSAT analysis, recommend improvements:
+    - Top 3 areas for improvement
+    - Root cause analysis for low scores
+    - Specific training recommendations
+    - Process improvements needed
+    - Technology/tool recommendations
+    - Success metrics to track improvements""",
+    agent=improvement_specialist,
+    expected_output="Improvement plan with action items"
+)
+
+analytics_crew = Crew(
+    agents=[csat_analyst, improvement_specialist],
+    tasks=[csat_task, improvement_task],
+    verbose=True
+)</code></pre>
+
+      <h3>Escalation Management</h3>
+      <div class="code-label">Python - Escalation Workflow</div>
+      <pre><code class="language-python">from crewai import Agent, Task, Crew
+from enum import Enum
+
+class EscalationLevel(Enum):
+    TIER_1 = "First line support"
+    TIER_2 = "Technical specialist"
+    TIER_3 = "Senior engineer"
+    MANAGEMENT = "Management review"
+
+# Escalation Agents
+manager = Agent(
+    role="Support Manager",
+    goal="Review escalated issues and ensure resolution",
+    backstory="Support manager with 15 years experience",
+    tools=[FileReadTool(), FileWriterTool()],
+    llm="gpt-4"
+)
+
+# Escalation Review
+escalation_task = Task(
+    description="""Review escalated ticket:
+    - Ticket ID: {ticket_id}
+    - Reason for escalation: {escalation_reason}
+    - Previous resolution attempts: {previous_attempts}
+    
+    Determine:
+    - Whether escalation is warranted
+    - Appropriate escalation level
+    - Priority reassessment
+    - Required actions
+    - Timeline for resolution
+    - Customer communication strategy""",
+    agent=manager,
+    expected_output="Escalation decision and action plan"
+)
+
+escalation_crew = Crew(
+    agents=[manager],
+    tasks=[escalation_task],
+    verbose=True
+)</code></pre>
+
+      <h3>Best Practices</h3>
+      <ul>
+        <li>Implement multi-level support hierarchy with clear escalation paths</li>
+        <li>Use sequential workflow to maintain context through resolution</li>
+        <li>Store customer interaction history for context awareness</li>
+        <li>Implement callbacks to track support metrics</li>
+        <li>Create separate crews for different support workflows</li>
+        <li>Build knowledge bases from common issues</li>
+        <li>Monitor and optimize CSAT metrics continuously</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Technology Overview • January 2026</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-kotlin.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+</body>
+</html>
